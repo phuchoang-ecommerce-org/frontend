@@ -1,0 +1,53 @@
+name: frontend-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint-typecheck-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
+      - working-directory: ecommerce-frontend-next
+        run: npm ci
+      - working-directory: ecommerce-frontend-next
+        run: npm run lint
+      - working-directory: ecommerce-frontend-next
+        run: npm run typecheck
+      - working-directory: ecommerce-frontend-next
+        run: npm run test
+
+  openapi-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Lint OpenAPI spec (Redocly)
+        working-directory: util
+        run: npm ci && npm run docs:openapi:lint
+      - name: Regenerate types and fail on diff
+        working-directory: ecommerce-frontend-next
+        run: |
+          npm ci
+          npm run codegen:api:check
+
+  prism-smoke:
+    runs-on: ubuntu-latest
+    needs: [openapi-contract]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
+      - working-directory: ecommerce-frontend-next
+        run: npm ci
+      - name: Start Prism and smoke-check getProduct
+        working-directory: ecommerce-frontend-next
+        run: |
+          npm run mock:api &
+          npx --yes wait-on http://localhost:4010/products/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12
+          curl -sf http://localhost:4010/products/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12 | grep -q '"id"'
