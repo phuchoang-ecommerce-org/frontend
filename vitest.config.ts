@@ -10,6 +10,10 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": dirname,
+      // Vitest runs plain Node resolution (no bundler "react-server"
+      // condition), so the real server-only package would throw on import.
+      // Use its own published no-op build for the "react-server" condition.
+      "server-only": path.resolve(dirname, "node_modules/server-only/empty.js"),
     },
   },
   test: {

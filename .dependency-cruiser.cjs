@@ -43,6 +43,14 @@ module.exports = {
       },
       to: { path: "^stores/" },
     },
+    {
+      name: "lib-api-internal-not-imported-outside-lib-api",
+      severity: "error",
+      comment:
+        "I-4: nothing outside lib/api imports the fetch client's internals directly — only lib/api/index.ts.",
+      from: { pathNot: "^lib/api/" },
+      to: { path: "^lib/api/(?!index\\.ts$).+" },
+    },
   ],
   options: {
     doNotFollow: { path: "node_modules" },

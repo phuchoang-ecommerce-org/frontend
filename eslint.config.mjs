@@ -23,11 +23,11 @@ const eslintConfig = defineConfig([
         { type: "features", pattern: "features/*", capture: ["feature"] },
         { type: "components-ui", pattern: "components/ui/*" },
         { type: "components-layout", pattern: "components/layout/*" },
-        { type: "lib-api", pattern: "lib/api/*" },
-        { type: "lib-session", pattern: "lib/session/*" },
-        { type: "lib-observability", pattern: "lib/observability/*" },
-        { type: "lib-utils", pattern: "lib/utils/*" },
-        { type: "stores", pattern: "stores/*" },
+        { type: "lib-api", pattern: "lib/api/**" },
+        { type: "lib-session", pattern: "lib/session/**" },
+        { type: "lib-observability", pattern: "lib/observability/**" },
+        { type: "lib-utils", pattern: "lib/utils/**" },
+        { type: "stores", pattern: "stores/**" },
       ],
     },
     plugins: { boundaries, react },
@@ -107,6 +107,19 @@ const eslintConfig = defineConfig([
                 },
               ],
             },
+            // lib/api may import lib/session (headers.ts's token/CSRF seam) and
+            // lib/utils. I-4 ("only lib/api/index.ts is importable from outside
+            // lib/api") is enforced by .dependency-cruiser.cjs instead of here:
+            // eslint-plugin-boundaries classifies by folder, not by individual
+            // file, so it cannot distinguish index.ts from its sibling files
+            // within the same element type — dependency-cruiser's path-regex
+            // rules can and do.
+            {
+              from: { element: { type: "lib-api" } },
+              allow: [
+                { to: { element: { type: ["lib-session", "lib-utils"] } } },
+              ],
+            },
             // I-5: components/ui and components/layout import nothing from features/ or lib/api.
             {
               from: { element: { type: ["components-ui", "components-layout"] } },
@@ -124,7 +137,7 @@ const eslintConfig = defineConfig([
             // 'server-only' enforces the precise file-level rule at build time).
             {
               from: {
-                element: { type: ["lib-api", "lib-session", "lib-observability"] },
+                element: { type: ["lib-session", "lib-observability"] },
               },
               allow: [{ to: { element: { type: "lib-utils" } } }],
             },
@@ -173,6 +186,29 @@ const eslintConfig = defineConfig([
       },
     },
   },
+  // No arithmetic on Money.amount anywhere except its one sanctioned
+  // formatter (lib/api/money.ts's formatMoney) — Money.amount is a decimal
+  // string precisely so no client parser turns it into a binary float
+  // (Data Fetching.md §3, Integration Contract §2).
+  {
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["lib/api/money.ts", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector:
+            "CallExpression[callee.name=/^(Number|parseFloat|parseInt)$/] MemberExpression[property.name='amount']",
+          message:
+            "Do not coerce Money.amount to a number for arithmetic. Use lib/api's formatMoney at the presentation layer only.",
+        },
+        {
+          selector: "UnaryExpression[operator='+'] MemberExpression[property.name='amount']",
+          message: "Do not coerce Money.amount with unary +.",
+        },
+      ],
+    },
+  },
   // I-8: @tanstack/react-query is importable from exactly these feature paths.
   {
     files: ["**/*.{ts,tsx}"],
@@ -207,6 +243,7 @@ const eslintConfig = defineConfig([
     "test-results/**",
     "*.config.{js,mjs,cjs,ts}",
     ".dependency-cruiser.cjs",
+    "lib/api/generated/**",
   ]),
 ]);
 
