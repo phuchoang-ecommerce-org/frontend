@@ -19,10 +19,18 @@ const eslintConfig = defineConfig([
     },
     settings: {
       "boundaries/elements": [
-        { type: "app", pattern: "app/*" },
+        // "app/**" (not "app/*"): route groups nest layouts/pages/error
+        // boundaries a level deeper than the old flat app/ — Sprint 1's
+        // review notes already found the single-star form silently
+        // misclassifies nested files as "unknown" elements.
+        { type: "app", pattern: "app/**" },
         { type: "features", pattern: "features/*", capture: ["feature"] },
-        { type: "components-ui", pattern: "components/ui/*" },
-        { type: "components-layout", pattern: "components/layout/*" },
+        // "**" (not "*"): same single-star depth bug Sprint 1 found for
+        // lib/api/* et al. — a bare "components/ui/*" pattern doesn't
+        // reliably match a direct file in this eslint-plugin-boundaries
+        // version's underlying matcher.
+        { type: "components-ui", pattern: "components/ui/**" },
+        { type: "components-layout", pattern: "components/layout/**" },
         { type: "lib-api", pattern: "lib/api/**" },
         { type: "lib-session", pattern: "lib/session/**" },
         { type: "lib-observability", pattern: "lib/observability/**" },
@@ -117,7 +125,13 @@ const eslintConfig = defineConfig([
             {
               from: { element: { type: "lib-api" } },
               allow: [
-                { to: { element: { type: ["lib-session", "lib-utils"] } } },
+                {
+                  to: {
+                    element: {
+                      type: ["lib-session", "lib-observability", "lib-utils"],
+                    },
+                  },
+                },
               ],
             },
             // I-5: components/ui and components/layout import nothing from features/ or lib/api.
