@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
+        with: { node-version: 24, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
       - working-directory: ecommerce-frontend-next
         run: npm ci
       - working-directory: ecommerce-frontend-next
@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20 }
+        with: { node-version: 24 }
       - name: Lint OpenAPI spec (Redocly)
         working-directory: util
         run: npm ci && npm run docs:openapi:lint
@@ -42,7 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
+        with: { node-version: 24, cache: npm, cache-dependency-path: ecommerce-frontend-next/package-lock.json }
       - working-directory: ecommerce-frontend-next
         run: npm ci
       - name: Start Prism and smoke-check getProduct
