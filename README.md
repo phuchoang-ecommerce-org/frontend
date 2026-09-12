@@ -2,6 +2,8 @@
 
 The storefront and account frontend for the Enterprise Commerce Platform. See [`../docs`](../docs/) for the architecture and product documentation.
 
+> Split out of the original `phuchoang2005/ecommerce` monorepo into its own repo under the `phuchoang-ecommerce-org` organization, with full git history preserved. Architecture/product/PM documentation, plus the shared OpenAPI contract used for codegen below, lives in the sibling [`docs`](https://github.com/phuchoang-ecommerce-org/docs) repo, pulled in here as a git submodule at `docs/` (see that repo's README). The `../docs/...` links below still reflect the old monorepo layout and will be repointed at the submodule path.
+
 ### Running it
 
 ```bash
