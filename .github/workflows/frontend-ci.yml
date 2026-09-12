@@ -44,5 +44,5 @@ jobs:
       - name: Start Prism and smoke-check getProduct
         run: |
           npm run mock:api &
-          npx --yes wait-on http://localhost:4010/products/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12
+          npx --yes wait-on http-get://localhost:4010/products/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12
           curl -sf http://localhost:4010/products/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12 | grep -q '"id"'
