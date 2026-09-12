@@ -1,8 +1,8 @@
 ## ecommerce-frontend-next
 
-The storefront and account frontend for the Enterprise Commerce Platform. See [`../docs`](../docs/) for the architecture and product documentation.
+The storefront and account frontend for the Enterprise Commerce Platform. See [`docs`](docs/) for the architecture and product documentation.
 
-> Split out of the original `phuchoang2005/ecommerce` monorepo into its own repo under the `phuchoang-ecommerce-org` organization, with full git history preserved. Architecture/product/PM documentation, plus the shared OpenAPI contract used for codegen below, lives in the sibling [`docs`](https://github.com/phuchoang-ecommerce-org/docs) repo, pulled in here as a git submodule at `docs/` (see that repo's README). The `../docs/...` links below still reflect the old monorepo layout and will be repointed at the submodule path.
+> Split out of the original `phuchoang2005/ecommerce` monorepo into its own repo under the `phuchoang-ecommerce-org` organization, with full git history preserved. Architecture/product/PM documentation, plus the shared OpenAPI contract used for codegen below, lives in the sibling [`docs`](https://github.com/phuchoang-ecommerce-org/docs) repo, pulled in here as a git submodule at `docs/` (see that repo's README). Run `git submodule update --init --recursive` after cloning.
 
 ### Running it
 
@@ -25,4 +25,4 @@ npm run build      # typecheck + production build
 
 ### Layout
 
-See [`Feature Structure.md`](../docs/SA-docs/03-frontend/Feature%20Structure.md) for the folder layout and import rules, and [`ADR-0022`](../docs/SA-docs/01-system/ADR/ADR-0022-ma-design-tokens.md) for the design tokens in `styles/theme.css`.
+See [`Feature Structure.md`](docs/SA-docs/03-frontend/Feature%20Structure.md) for the folder layout and import rules, and [`ADR-0022`](docs/SA-docs/01-system/ADR/ADR-0022-ma-design-tokens.md) for the design tokens in `styles/theme.css`.

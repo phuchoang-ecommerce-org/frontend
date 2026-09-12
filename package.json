@@ -13,9 +13,9 @@
     "test:contract": "vitest run --config vitest.config.ts features/identity/server/actions.contract.test.ts",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
-    "codegen:api": "openapi-typescript ../docs/SA-docs/04-shared/OpenAPI/openapi.yaml -o lib/api/generated/openapi.d.ts",
+    "codegen:api": "openapi-typescript docs/SA-docs/04-shared/OpenAPI/openapi.yaml -o lib/api/generated/openapi.d.ts",
     "codegen:api:check": "npm run codegen:api && git diff --exit-code -- lib/api/generated/openapi.d.ts",
-    "mock:api": "prism mock ../docs/SA-docs/04-shared/OpenAPI/openapi.yaml -p 4010"
+    "mock:api": "prism mock docs/SA-docs/04-shared/OpenAPI/openapi.yaml -p 4010"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

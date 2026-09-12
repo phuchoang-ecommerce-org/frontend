@@ -1,6 +1,6 @@
 @AGENTS.md
 
-The document of this project is defined in [Document](../docs/)
+The document of this project is defined in [Document](docs/)
 
 If you want to use Python environment, I want you to use:
 
