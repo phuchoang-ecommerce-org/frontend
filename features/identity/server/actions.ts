@@ -10,7 +10,21 @@ import {
   EmailVerificationRequestSchema,
   VerificationResendRequestSchema,
 } from "../schema/verification";
-import { CredentialsRequestSchema, SessionSchema, type Session, type PublicSession } from "../schema/session";
+import {
+  CredentialsRequestSchema,
+  SessionSchema,
+  AccountSchema,
+  type Session,
+  type PublicSession,
+  type Account,
+} from "../schema/session";
+import { ProfileUpdateRequestSchema } from "../schema/profile";
+import {
+  PasswordChangeRequestSchema,
+  PasswordResetRequestSchema,
+  PasswordResetSchema,
+} from "../schema/security";
+import { CustomerAddressSchema, CustomerAddressWriteSchema, type CustomerAddress } from "../schema/address";
 import { toActionResult, type ActionResult } from "./error-mapping";
 
 function fieldErrorsFromZod(error: z.ZodError): Record<string, string> {
@@ -150,5 +164,183 @@ export async function logOut(input?: unknown): Promise<ActionResult> {
     return toActionResult(err);
   } finally {
     await destroySession();
+  }
+}
+
+/**
+ * requestPasswordReset — POST /password-reset-requests (202, no body).
+ * Anonymous (`security: []`) — no CSRF, same as registerAccount. Non-disclosive
+ * by design (`BR-CUS-04`): a well-formed request always returns `{ok:true}`,
+ * whether or not the address is registered.
+ */
+export async function requestPasswordReset(input: unknown): Promise<ActionResult> {
+  const parsed = PasswordResetRequestSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await apiMutate(
+      { method: "POST", path: "/password-reset-requests", body: parsed.data, cache: "no-store" },
+      z.void(),
+    );
+    return { ok: true };
+  } catch (err) {
+    return toActionResult(err);
+  }
+}
+
+/**
+ * completePasswordReset — POST /password-resets (204, no body). Anonymous, no
+ * CSRF. Failure (expired/used/unknown token, all `404`) stays on the generic
+ * non-disclosive copy in error-mapping.ts — the contract doesn't emit a code
+ * that distinguishes those causes, so the UI can't either.
+ */
+export async function completePasswordReset(input: unknown): Promise<ActionResult> {
+  const parsed = PasswordResetSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await apiMutate(
+      { method: "POST", path: "/password-resets", body: parsed.data, cache: "no-store" },
+      z.void(),
+    );
+    return { ok: true };
+  } catch (err) {
+    return toActionResult(err);
+  }
+}
+
+/**
+ * changeOwnPassword — PUT /accounts/me/password (204, no body). Requires
+ * current-password re-confirmation; ends the caller's other sessions by
+ * default (`BR-CUS-03`).
+ */
+export async function changeOwnPassword(input: unknown): Promise<ActionResult> {
+  const { csrfToken, ...rest } = asRecord(input);
+  const parsed = PasswordChangeRequestSchema.safeParse(rest);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await requireCsrf(csrfToken);
+    await apiMutate(
+      { method: "PUT", path: "/accounts/me/password", body: parsed.data, cache: "no-store" },
+      z.void(),
+    );
+    return { ok: true };
+  } catch (err) {
+    return toActionResult(err);
+  }
+}
+
+/** endAllOwnSessions — DELETE /sessions (204, no body). Server-side invalidation of every session and refresh token (`ADR-0025` §4). */
+export async function endAllOwnSessions(input?: unknown): Promise<ActionResult> {
+  const { csrfToken } = asRecord(input);
+  try {
+    await requireCsrf(csrfToken);
+  } catch (err) {
+    return toActionResult(err);
+  }
+
+  try {
+    await apiMutate({ method: "DELETE", path: "/sessions", cache: "no-store" }, z.void());
+    return { ok: true };
+  } catch (err) {
+    return toActionResult(err);
+  }
+}
+
+/**
+ * updateOwnProfile — PATCH /accounts/me (200, body Account). Submitting
+ * `email` does not change `email` directly: it populates `pendingEmail` and
+ * starts a verification cycle (`UC-CUS-08` A2) — the caller renders
+ * `pendingEmail` distinctly rather than treating the response's `email` as
+ * already updated.
+ */
+export async function updateOwnProfile(input: unknown): Promise<ActionResult<Account>> {
+  const { csrfToken, ...rest } = asRecord(input);
+  const parsed = ProfileUpdateRequestSchema.safeParse(rest);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await requireCsrf(csrfToken);
+    const account = await apiMutate(
+      { method: "PATCH", path: "/accounts/me", body: parsed.data, cache: "no-store" },
+      AccountSchema,
+    );
+    return { ok: true, data: account };
+  } catch (err) {
+    return toActionResult<Account>(err);
+  }
+}
+
+/** addOwnAddress — POST /accounts/me/addresses (201, body CustomerAddress). */
+export async function addOwnAddress(input: unknown): Promise<ActionResult<CustomerAddress>> {
+  const { csrfToken, ...rest } = asRecord(input);
+  const parsed = CustomerAddressWriteSchema.safeParse(rest);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await requireCsrf(csrfToken);
+    const address = await apiMutate(
+      { method: "POST", path: "/accounts/me/addresses", body: parsed.data, cache: "no-store" },
+      CustomerAddressSchema,
+    );
+    return { ok: true, data: address };
+  } catch (err) {
+    return toActionResult<CustomerAddress>(err);
+  }
+}
+
+/**
+ * replaceOwnAddress — PUT /accounts/me/addresses/{addressId} (200, body
+ * CustomerAddress). Whole replacement, idempotent. An address belonging to
+ * another customer is `404`, never `403` (Integration Contract §2.1).
+ */
+export async function replaceOwnAddress(
+  addressId: string,
+  input: unknown,
+): Promise<ActionResult<CustomerAddress>> {
+  const { csrfToken, ...rest } = asRecord(input);
+  const parsed = CustomerAddressWriteSchema.safeParse(rest);
+  if (!parsed.success) return { ok: false, fieldErrors: fieldErrorsFromZod(parsed.error) };
+
+  try {
+    await requireCsrf(csrfToken);
+    const address = await apiMutate(
+      {
+        method: "PUT",
+        path: "/accounts/me/addresses/{addressId}",
+        pathParams: { addressId },
+        body: parsed.data,
+        cache: "no-store",
+      },
+      CustomerAddressSchema,
+    );
+    return { ok: true, data: address };
+  } catch (err) {
+    return toActionResult<CustomerAddress>(err);
+  }
+}
+
+/**
+ * removeOwnAddress — DELETE /accounts/me/addresses/{addressId} (204,
+ * idempotent — an address already gone is still `204`, not `404`, per
+ * Integration Contract §2.1).
+ */
+export async function removeOwnAddress(addressId: string, input?: unknown): Promise<ActionResult> {
+  const { csrfToken } = asRecord(input);
+  try {
+    await requireCsrf(csrfToken);
+  } catch (err) {
+    return toActionResult(err);
+  }
+
+  try {
+    await apiMutate(
+      { method: "DELETE", path: "/accounts/me/addresses/{addressId}", pathParams: { addressId }, cache: "no-store" },
+      z.void(),
+    );
+    return { ok: true };
+  } catch (err) {
+    return toActionResult(err);
   }
 }

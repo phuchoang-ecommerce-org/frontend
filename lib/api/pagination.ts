@@ -18,3 +18,18 @@ export function cursorQuery(cursor?: string, size?: number): Record<string, stri
   if (size !== undefined) query.size = String(size);
   return query;
 }
+
+/**
+ * The wire envelope (`{items, page: {size, next?, total?}}`, common.yaml#PageEnvelope)
+ * flattened into the app-level `Page<T>` shape above. One implementation, shared by
+ * every feature reading a collection — not duplicated per feature.
+ */
+export function toPage<T>(
+  envelope: { items: T[]; page: { next?: string | undefined; total?: number | undefined } },
+): Page<T> {
+  return {
+    items: envelope.items,
+    next: envelope.page.next ?? null,
+    ...(envelope.page.total !== undefined ? { total: envelope.page.total } : {}),
+  };
+}

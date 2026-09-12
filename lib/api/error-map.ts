@@ -38,4 +38,7 @@ export const ERROR_SCREEN_MAP: Record<string, ErrorScreenOutcome> = {
   // "an expired one is reported as expired." Add an entry here once the
   // backend actually emits a distinguishing code; until then, verify-email
   // failure copy must stay generic (see app/(auth)/verify-email/page.tsx).
+  // Sprint 5: passwordResets (completePasswordReset) shares the exact same
+  // gap — expired/used/unknown reset tokens are all a plain `404` with no
+  // distinguishing code — so its failure copy stays generic too.
 };

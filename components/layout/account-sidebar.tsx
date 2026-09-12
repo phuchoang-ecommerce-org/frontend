@@ -7,7 +7,8 @@ const ACCOUNT_LINKS = [
   { href: "/account", label: "Overview" },
   { href: "/account/orders", label: "Orders" },
   { href: "/account/addresses", label: "Addresses" },
-  { href: "/account/settings", label: "Settings" },
+  { href: "/account/profile", label: "Profile" },
+  { href: "/account/security", label: "Security" },
 ] as const;
 
 export interface AccountSidebarProps {

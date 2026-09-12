@@ -10,7 +10,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:contract": "vitest run --config vitest.config.ts features/identity/server/actions.contract.test.ts",
+    "test:contract": "vitest run --config vitest.config.ts contract.test.ts",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "codegen:api": "openapi-typescript docs/SA-docs/04-shared/OpenAPI/openapi.yaml -o lib/api/generated/openapi.d.ts",

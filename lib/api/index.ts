@@ -8,7 +8,8 @@ export { apiQuery, apiMutate } from "./client";
 export { ApiParseError, ApiProblem, ApiTransportError } from "./errors";
 export { ERROR_SCREEN_MAP, type ErrorScreenOutcome } from "./error-map";
 export { readOptionalSection } from "./authz";
-export { cursorQuery, type Page } from "./pagination";
+export { cursorQuery, toPage, type Page } from "./pagination";
+export { AddressSchema, type Address } from "./address";
 export {
   asProductId,
   asSkuId,
