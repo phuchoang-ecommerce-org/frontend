@@ -51,4 +51,29 @@
 
   /* Layout — §2 max content width, via the max-w-* namespace. */
   --container-content: 1440px;
+
+  /* Motion — ADR-0026's five named presets, exactly these and no others. */
+  --ease-out-motion: cubic-bezier(0, 0, 0.2, 1);
+  --duration-fade: 150ms;
+  --duration-fade-rise: 200ms;
+  --duration-color-shift: 150ms;
+  --duration-elevate: 200ms;
+  --duration-overlay: 250ms;
+}
+
+/*
+ * ADR-0026 — reduced motion is a global floor, not a per-component opt-in.
+ * lib/motion/presets.ts also checks useReducedMotion() itself (for the
+ * translate/shadow components framer-motion drives), but this rule covers
+ * every plain CSS transition/animation regardless of which component wrote it.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

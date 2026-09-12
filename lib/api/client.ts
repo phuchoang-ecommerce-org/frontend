@@ -105,9 +105,22 @@ async function apiRequest<TSchema extends z.ZodTypeAny>(
     throw new ApiTransportError(operation, new Error("304 Not Modified has no body to parse"));
   }
 
-  const raw: unknown = await response.json().catch((cause: unknown) => {
-    throw new ApiParseError(operation, correlationId, cause);
+  // A 202/204 success carries no body (e.g. registerAccount, logOut) — only
+  // parse when there's something to parse; an empty success body is `undefined`,
+  // not a parse failure, and the caller states that expectation with z.void().
+  const bodyText = await response.text().catch((cause: unknown) => {
+    throw new ApiTransportError(operation, cause);
   });
+  const raw: unknown =
+    bodyText.length === 0
+      ? undefined
+      : ((): unknown => {
+          try {
+            return JSON.parse(bodyText);
+          } catch (cause) {
+            throw new ApiParseError(operation, correlationId, cause);
+          }
+        })();
 
   if (!response.ok) {
     const problemResult = ProblemSchema.safeParse(raw);

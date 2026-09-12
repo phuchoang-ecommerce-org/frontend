@@ -34,6 +34,7 @@ const eslintConfig = defineConfig([
         { type: "lib-api", pattern: "lib/api/**" },
         { type: "lib-session", pattern: "lib/session/**" },
         { type: "lib-observability", pattern: "lib/observability/**" },
+        { type: "lib-motion", pattern: "lib/motion/**" },
         { type: "lib-utils", pattern: "lib/utils/**" },
         { type: "stores", pattern: "stores/**" },
       ],
@@ -86,6 +87,7 @@ const eslintConfig = defineConfig([
                         "lib-api",
                         "lib-session",
                         "lib-observability",
+                        "lib-motion",
                         "lib-utils",
                         "stores",
                       ],
@@ -107,6 +109,7 @@ const eslintConfig = defineConfig([
                         "lib-api",
                         "lib-session",
                         "lib-observability",
+                        "lib-motion",
                         "lib-utils",
                         "stores",
                       ],
@@ -141,7 +144,7 @@ const eslintConfig = defineConfig([
                 {
                   to: {
                     element: {
-                      type: ["components-ui", "components-layout", "lib-utils"],
+                      type: ["components-ui", "components-layout", "lib-motion", "lib-utils"],
                     },
                   },
                 },

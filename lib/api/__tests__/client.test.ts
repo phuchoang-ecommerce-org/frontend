@@ -81,4 +81,15 @@ describe("apiQuery", () => {
       apiQuery({ path: "/products/{id}", pathParams: { id: "1" }, cache: "no-store" }, ItemSchema),
     ).rejects.toBeInstanceOf(ApiParseError);
   });
+
+  it("treats a 204 empty body as undefined rather than a parse failure", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response(null, { status: 204 }))),
+    );
+
+    await expect(
+      apiQuery({ path: "/sessions/current", cache: "no-store" }, z.void()),
+    ).resolves.toBeUndefined();
+  });
 });
