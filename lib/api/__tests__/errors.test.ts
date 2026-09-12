@@ -18,6 +18,16 @@ describe("ApiProblem", () => {
     expect(error.code).toBe("ECP-INV-4091");
     expect(error.problem).toBe(problem);
   });
+
+  it("carries retryAfter when the caller supplies it (429/Retry-After)", () => {
+    const error = new ApiProblem({ ...problem, code: "ECP-GEN-4290", status: 429 }, 30);
+    expect(error.retryAfter).toBe(30);
+  });
+
+  it("leaves retryAfter undefined when not supplied", () => {
+    const error = new ApiProblem(problem);
+    expect(error.retryAfter).toBeUndefined();
+  });
 });
 
 describe("ApiParseError", () => {

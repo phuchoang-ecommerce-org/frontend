@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ApiProblem, ApiTransportError } from "@/lib/api";
+import { CsrfError } from "@/lib/session";
 
 import { toActionResult } from "./error-mapping";
 
@@ -38,6 +39,29 @@ describe("toActionResult", () => {
       problem({ code: "ECP-GEN-4290", status: 429, title: "Rate limit exceeded", errors: [] }),
     );
     expect(result.formError?.retryable).toBe(true);
+  });
+
+  it("carries retryAfterSeconds through for a 429 so the caller can render the dedicated screen", () => {
+    const rateLimited = new ApiProblem(
+      {
+        type: "https://ecp.example/errors/ECP-GEN-4290",
+        title: "Rate limit exceeded",
+        status: 429,
+        code: "ECP-GEN-4290",
+        instance: "/sessions",
+        errors: [],
+      },
+      30,
+    );
+    const result = toActionResult(rateLimited);
+    expect(result.formError?.retryAfterSeconds).toBe(30);
+  });
+
+  it("maps a CSRF failure to a retryable, non-disclosive form-level message", () => {
+    const result = toActionResult(new CsrfError());
+    expect(result.fieldErrors).toBeUndefined();
+    expect(result.formError?.retryable).toBe(true);
+    expect(result.formError?.message).not.toMatch(/csrf|token/i);
   });
 
   it("maps a transport failure to a generic retryable message", () => {

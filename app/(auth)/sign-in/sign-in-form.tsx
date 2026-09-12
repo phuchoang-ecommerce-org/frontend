@@ -7,27 +7,29 @@ import { Form, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CsrfField } from "@/components/ui/csrf-field";
+import { RateLimited } from "@/components/ui/rate-limited";
 import { logIn } from "@/features/identity/server/actions";
-import type { Session } from "@/features/identity/schema/session";
+import type { PublicSession } from "@/features/identity/schema/session";
 import type { ActionResult } from "@/features/identity/server/error-mapping";
 
-const initialState: ActionResult<Session> = { ok: false };
+const initialState: ActionResult<PublicSession> = { ok: false };
 
 export function SignInForm() {
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, isPending] = useActionState(
-    async (_prev: ActionResult<Session>, formData: FormData): Promise<ActionResult<Session>> =>
+    async (
+      _prev: ActionResult<PublicSession>,
+      formData: FormData,
+    ): Promise<ActionResult<PublicSession>> =>
       logIn({
         email: formData.get("email"),
         password: formData.get("password"),
+        csrfToken: formData.get("csrfToken"),
       }),
     initialState,
   );
 
-  // lib/session's token/CSRF custody is still a no-op this sprint (Sprint 4's
-  // EN-FE-API-2) — a successful call here does not leave the browser holding
-  // a real ecp_session cookie, so redirecting to /account would just bounce
-  // straight back via proxy.ts. Acknowledge success in place instead.
   if (state.ok) {
     return (
       <EmptyState icon={CheckCircle2} title="Signed in." action={{ label: "Continue", href: "/" }} />
@@ -37,7 +39,14 @@ export function SignInForm() {
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-xl font-semibold text-primary">Sign in</h1>
-      {state.formError ? (
+      {state.formError?.retryAfterSeconds !== undefined ? (
+        // A designed retry affordance, never the generic error boundary
+        // (US-AUD-04/FE) — sign-in carries the strictest rate limit.
+        <RateLimited
+          retryAfterSeconds={state.formError.retryAfterSeconds}
+          onRetry={() => formRef.current?.querySelector("input")?.focus()}
+        />
+      ) : state.formError ? (
         // Byte-identical regardless of cause (unknown account vs wrong
         // password are indistinguishable, BR-CUS-04) — worded so it could
         // later be reused verbatim for a password-reset failure.
@@ -51,6 +60,7 @@ export function SignInForm() {
         />
       ) : null}
       <Form ref={formRef} action={formAction}>
+        <CsrfField />
         <FormField name="email" label="Email" error={state.fieldErrors?.email}>
           <Input type="email" required />
         </FormField>

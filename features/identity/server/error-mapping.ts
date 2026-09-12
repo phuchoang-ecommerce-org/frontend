@@ -1,12 +1,19 @@
 import "server-only";
 
 import { ApiParseError, ApiProblem, ApiTransportError, ERROR_SCREEN_MAP } from "@/lib/api";
+import { CsrfError } from "@/lib/session";
 
 export interface ActionResult<T = undefined> {
   ok: boolean;
   data?: T;
   fieldErrors?: Record<string, string>;
-  formError?: { message: string; retryable: boolean; correlationId?: string };
+  formError?: {
+    message: string;
+    retryable: boolean;
+    correlationId?: string;
+    /** Seconds — set only for a 429 outcome, so the caller can render the dedicated rate-limited screen (US-AUD-04/FE) instead of a generic form error. */
+    retryAfterSeconds?: number;
+  };
 }
 
 const GENERIC_RETRY_MESSAGE = "Something went wrong. Please try again.";
@@ -32,6 +39,15 @@ function nonDisclosiveMessageFor(code: string): { message: string; retryable: bo
  * message via `formError`.
  */
 export function toActionResult<T>(err: unknown): ActionResult<T> {
+  if (err instanceof CsrfError) {
+    // Rendered via the §13 empty-state pattern, not a stack trace (Frontend
+    // Architecture.md §4.3) — never disclose the specific cookie/header
+    // mismatch, just ask for a retry once a fresh token is in place.
+    return {
+      ok: false,
+      formError: { message: "Your session needs to be refreshed. Please try again.", retryable: true },
+    };
+  }
   if (err instanceof ApiProblem) {
     if (err.problem.errors.length > 0) {
       return {
@@ -48,6 +64,7 @@ export function toActionResult<T>(err: unknown): ActionResult<T> {
         message,
         retryable,
         ...(err.problem.correlationId ? { correlationId: err.problem.correlationId } : {}),
+        ...(err.retryAfter !== undefined ? { retryAfterSeconds: err.retryAfter } : {}),
       },
     };
   }

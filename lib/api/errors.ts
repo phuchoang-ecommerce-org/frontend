@@ -16,7 +16,11 @@ export class ApiParseError extends Error {
 
 /** A non-2xx response, parsed into the RFC 9457 problem+json taxonomy. */
 export class ApiProblem extends Error {
-  constructor(public readonly problem: Problem) {
+  constructor(
+    public readonly problem: Problem,
+    /** Seconds, parsed from a `Retry-After` response header — only ever set on 429 (ECP-GEN-4290). */
+    public readonly retryAfter?: number,
+  ) {
     super(problem.title);
     this.name = "ApiProblem";
   }

@@ -1,6 +1,14 @@
 import { z } from "zod";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+// These tests run outside any Next.js request scope, so next/headers'
+// cookies() would throw — stub an empty, no-session cookie jar (lib/api's
+// tests exercise the transport layer, not session custody; lib/session's
+// own tests cover getAccessToken/getCsrfToken directly).
+vi.mock("next/headers", () => ({
+  cookies: () => Promise.resolve({ get: () => undefined }),
+}));
+
 import { apiQuery } from "../client";
 import { ApiParseError, ApiProblem } from "../errors";
 

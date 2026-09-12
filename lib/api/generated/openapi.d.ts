@@ -90,8 +90,13 @@ export interface paths {
          *     token plus a server-side refresh token that rotates on every use
          *     (`FR-CUS-03`, `ADR-0016` §4).
          *
-         *     A browser caller receives the tokens as `httpOnly` cookies and no token in
-         *     the body; a non-browser caller receives them in the body (`ADR-0025` §4).
+         *     **`ecp-api` always returns both tokens as JSON, to every caller.**
+         *     It has no notion of "browser" vs "non-browser" and never sets a cookie
+         *     itself — cookie custody (`ADR-0025` §4) is entirely `ecp-web`'s (the
+         *     Next.js server's) responsibility on *its own* response to the actual
+         *     browser, which sits in front of this API and is the only party that
+         *     ever presents a `bearerAuth` credential here (Sprint 03 backend
+         *     implementation decision; see `sprint-03-identity-core.md` Review Notes).
          *
          *     An unverified account gets a **restricted** session — browse and cart, no
          *     checkout (`UC-CUS-03` A2). Supplying `guestCartId` merges the guest cart in
@@ -125,7 +130,16 @@ export interface paths {
         post?: never;
         /**
          * Log out
-         * @description Ends the current session and invalidates its refresh token (`FR-CUS-04`). Idempotent: logging out of an already-ended session is `204`, not `404` (`Integration Contract` §2.1).
+         * @description Ends the current session and invalidates its refresh token (`FR-CUS-04`).
+         *     Idempotent: logging out of an already-ended session is `204`, not `404`
+         *     (`Integration Contract` §2.1).
+         *
+         *     **Drift fix (Sprint 03, backend lane).** A caller without cookie custody
+         *     (this platform's backend never issues one — `ADR-0025`'s cookie is a
+         *     Next.js-server concern) has no way to name which refresh token to
+         *     revoke from the access token alone. `refreshToken` was added to the
+         *     request body for that reason; its absence is treated as `UC-CUS-04` E1
+         *     (already ended), never an error.
          */
         delete: operations["logOut"];
         options?: never;
@@ -3170,11 +3184,11 @@ export interface components {
                 detail?: string;
             }[];
         };
-        /** @description An established session. The refresh token is held server-side and rotated on every use; it is returned to a non-browser caller only, and to a browser caller it is set as an `httpOnly` cookie and is absent from this body (`ADR-0016` §4, `ADR-0025` §4). */
+        /** @description An established session. `ecp-api` always returns both tokens as JSON — it has no browser/non-browser distinction and never sets a cookie itself (`ADR-0016` §4). `ecp-web`, the only caller that ever presents `bearerAuth` here, is what gives the real browser an `httpOnly` cookie on its own response, per `ADR-0025` §4 (Sprint 03 backend implementation decision). */
         Session: {
             /** @description Short-lived JWT. Never written to `localStorage` by any client. */
             accessToken: string;
-            /** @description Present only for a non-browser caller authenticating with `bearerAuth`. Rotated on every use; presenting a consumed one invalidates the whole session chain (`BR-CUS-03`). */
+            /** @description Always present. Rotated on every use; presenting a consumed one invalidates the whole session chain (`BR-CUS-03`). */
             refreshToken?: string;
             /**
              * Format: int32
@@ -3186,8 +3200,13 @@ export interface components {
             account: components["schemas"]["Account"];
             cartMerge?: components["schemas"]["CartMergeOutcome"];
         };
+        /** @description Sprint 03 drift fix — see `paths/identity.yaml#/sessionsCurrent`'s `delete` description. */
+        LogoutRequest: {
+            /** @description The refresh token to invalidate. Optional; its absence is `UC-CUS-04` E1 (already ended). */
+            refreshToken?: string;
+        };
         SessionRenewalRequest: {
-            /** @description Required for a non-browser caller. Omitted by a browser caller, whose refresh token travels in the `httpOnly` cookie. */
+            /** @description Required — `ecp-api` has no cookie to read it from (see `Session`). */
             refreshToken?: string;
         };
         PasswordResetRequest: {
@@ -5440,7 +5459,11 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["LogoutRequest"];
+            };
+        };
         responses: {
             /** @description Session ended. */
             204: {

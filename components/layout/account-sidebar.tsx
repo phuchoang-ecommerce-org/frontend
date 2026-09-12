@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
+import { CsrfField } from "@/components/ui/csrf-field";
 
 const ACCOUNT_LINKS = [
   { href: "/account", label: "Overview" },
@@ -16,7 +17,7 @@ export interface AccountSidebarProps {
    * features/* (rule I-5), so the caller (app/(account)/layout.tsx) supplies
    * features/identity's logOut.
    */
-  signOutAction?: () => Promise<void>;
+  signOutAction?: (formData: FormData) => Promise<void>;
 }
 
 export function AccountSidebar({ signOutAction }: AccountSidebarProps) {
@@ -33,6 +34,7 @@ export function AccountSidebar({ signOutAction }: AccountSidebarProps) {
       ))}
       {signOutAction ? (
         <form action={signOutAction}>
+          <CsrfField />
           <Button type="submit" variant="ghost" className="w-full justify-start px-3">
             Sign out
           </Button>

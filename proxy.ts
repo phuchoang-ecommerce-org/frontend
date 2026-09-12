@@ -63,9 +63,9 @@ export function proxy(request: NextRequest) {
 
   // Cookie SameSite posture (Strict under /admin, Lax elsewhere) is a
   // property of how the session cookie gets *issued*, not read — proxy
-  // doesn't set cookies here. lib/session's SESSION_COOKIE_NAME is where
-  // that posture will be applied once real cookie issuance lands (Sprint
-  // 1's provisional no-op seam is still in place).
+  // doesn't set cookies here. lib/session.createSession applies that
+  // posture at issuance time (EN-FE-API-2); this file still only checks
+  // the cookie's presence, never its value.
 
   return response;
 }

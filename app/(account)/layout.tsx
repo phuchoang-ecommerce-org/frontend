@@ -9,9 +9,9 @@ import { logOut } from "@/features/identity/server/actions";
 // away to /sign-in before this ever renders; this layout does not
 // re-check auth (that's the middleware's job, and ecp-api's on every read —
 // Security.md §13).
-async function signOutAction() {
+async function signOutAction(formData: FormData) {
   "use server";
-  await logOut();
+  await logOut({ csrfToken: formData.get("csrfToken") });
   redirect("/sign-in");
 }
 

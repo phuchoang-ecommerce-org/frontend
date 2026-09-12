@@ -49,3 +49,11 @@ export const SessionSchema = z
   .passthrough();
 
 export type Session = z.infer<typeof SessionSchema>;
+
+/**
+ * What logIn's Server Action actually returns to client code. "No access
+ * token ever reaches the browser" (Frontend Architecture.md §4.4) — the
+ * full Session (with its tokens) is consumed server-side by
+ * lib/session.createSession and never forwarded past that point.
+ */
+export type PublicSession = Omit<Session, "accessToken" | "refreshToken">;
