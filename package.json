@@ -16,7 +16,7 @@
     "codegen:api": "openapi-typescript docs/OpenAPI/openapi.yaml -o lib/api/generated/openapi.d.ts",
     "codegen:api:check": "npm run codegen:api && git diff --exit-code -- lib/api/generated/openapi.d.ts",
     "mock:api": "prism mock docs/OpenAPI/openapi.yaml -p 4010",
-    "docs:openapi:lint": "npx -y @redocly/cli@2 lint --config ./OpenAPI/redocly.yaml"
+    "docs:openapi:lint": "npx -y @redocly/cli@2 lint --config docs/OpenAPI/redocly.yaml"
   },
   "dependencies": {
     "class-variance-uthority": "^0.7.1",
