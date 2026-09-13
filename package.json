@@ -19,7 +19,7 @@
     "docs:openapi:lint": "npx -y @redocly/cli@2 lint --config docs/OpenAPI/redocly.yaml"
   },
   "dependencies": {
-    "class-variance-uthority": "^0.7.1",
+    "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
     "framer-motion": "^13.2.0",
     "lucide-react": "^1.44.0",
