@@ -1,0 +1,65 @@
+name: Enabler
+description: Pointed engineering enabler (EN-*) — never background work
+title: "EN-XXX-0/FE — "
+labels: [enabler]
+body:
+  - type: input
+    id: story-id
+    attributes:
+      label: "Story ID"
+      description: "The canonical id from the product backlog — e.g. `US-CAT-01`, `EN-WIRE-3`."
+      placeholder: "US-CAT-01"
+    validations:
+      required: true
+  - type: input
+    id: sprint-doc
+    attributes:
+      label: "Sprint doc"
+      description: "Link to the sprint backlog file this item is committed in."
+      placeholder: "https://github.com/phuchoang-ecommerce-org/docs/blob/main/PM-docs/sprint-backlogs/sprint-06-catalog-browse.md"
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: "Deliverable"
+      description: "What exists at the end that did not exist before. Be specific about the artefact, not the activity."
+    validations:
+      required: true
+  - type: textarea
+    id: impl
+    attributes:
+      label: "Implementation Checklist"
+      value: |
+        - [ ] 
+        - [ ] 
+
+    validations:
+      required: true
+  - type: textarea
+    id: handoff
+    attributes:
+      label: "Handoff"
+      description: "Which later sprint or lane consumes this, and where they will read it. Scheme mismatches between lanes are the failure this field exists to prevent."
+  - type: checkboxes
+    id: dod-lane
+    attributes:
+      label: "Definition of Done — §4 — Frontend Slice"
+      description: "Adapt to the nature of the work; this is a quality gate, not a formality. Full text: https://github.com/phuchoang-ecommerce-org/docs/blob/main/PM-docs/definition-of-done.md"
+      options:
+      - label: "1 — `tsc --noEmit` passes under `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`"
+      - label: "2 — No `any`; `unknown` plus narrowing is the sanctioned alternative"
+      - label: "3 — ESLint passes, including `eslint-plugin-boundaries` (`I-1`–`I-8`) and the `dependency-cruiser` cycle check"
+      - label: "4 — Generated types regenerated; the diff is empty"
+      - label: "5 — A hand-written, reviewed Zod parser exists for every response the UI depends on structurally"
+      - label: "6 — Vitest + Testing Library cover keyboard interaction, focus visibility, ≥ 44 px hit area; `axe` passes"
+      - label: "7 — `loading.tsx` is a skeleton in the shape of the content"
+      - label: "8 — Every independently-fetched section has its own `<Suspense>` boundary and degrades to its own empty state"
+      - label: "9 — `error.tsx` shows the correlation id, no stack and no response body"
+      - label: "10 — No arithmetic on `Money` anywhere"
+      - label: "11 — No Tailwind arbitrary values, no raw hex in component source"
+      - label: "12 — Rendering class (`R1`–`R4`) and cache posture match Routing §3; nothing in `(auth)`, `(account)`, `(admin)`, cart or checkout cached or indexed"
+      - label: "13 — The screen renders correctly against **both** the Prism mock **and** the real `ecp-api`"
+  - type: markdown
+    attributes:
+      value: |
+        Set `Work Type`, `Module`, `Priority`, `Sprint`, `Release`, `Size`, `Risk` and `Layer` on the
+        **project item**, not with labels — the Project fields are the authoritative classification.

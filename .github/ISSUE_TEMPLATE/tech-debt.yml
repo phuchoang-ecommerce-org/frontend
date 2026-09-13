@@ -1,0 +1,57 @@
+name: Tech Debt
+description: Existing technical deficiency that should be addressed
+title: "[Tech Debt] "
+labels: [type:tech-debt]
+body:
+  - type: textarea
+    id: deficiency
+    attributes:
+      label: "The deficiency"
+      description: "What is wrong now, and where."
+    validations:
+      required: true
+  - type: textarea
+    id: cost
+    attributes:
+      label: "Cost of carrying it"
+      description: "What it makes slower, riskier, or impossible. If nothing, this is not debt."
+    validations:
+      required: true
+  - type: textarea
+    id: remedy
+    attributes:
+      label: "Proposed remedy"
+    validations:
+      required: true
+  - type: textarea
+    id: impl
+    attributes:
+      label: "Implementation Checklist"
+      value: |
+        - [ ] 
+        - [ ] 
+
+  - type: checkboxes
+    id: dod-lane
+    attributes:
+      label: "Definition of Done — §4 — Frontend Slice"
+      description: "Adapt to the nature of the work; this is a quality gate, not a formality. Full text: https://github.com/phuchoang-ecommerce-org/docs/blob/main/PM-docs/definition-of-done.md"
+      options:
+      - label: "1 — `tsc --noEmit` passes under `strict` + `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`"
+      - label: "2 — No `any`; `unknown` plus narrowing is the sanctioned alternative"
+      - label: "3 — ESLint passes, including `eslint-plugin-boundaries` (`I-1`–`I-8`) and the `dependency-cruiser` cycle check"
+      - label: "4 — Generated types regenerated; the diff is empty"
+      - label: "5 — A hand-written, reviewed Zod parser exists for every response the UI depends on structurally"
+      - label: "6 — Vitest + Testing Library cover keyboard interaction, focus visibility, ≥ 44 px hit area; `axe` passes"
+      - label: "7 — `loading.tsx` is a skeleton in the shape of the content"
+      - label: "8 — Every independently-fetched section has its own `<Suspense>` boundary and degrades to its own empty state"
+      - label: "9 — `error.tsx` shows the correlation id, no stack and no response body"
+      - label: "10 — No arithmetic on `Money` anywhere"
+      - label: "11 — No Tailwind arbitrary values, no raw hex in component source"
+      - label: "12 — Rendering class (`R1`–`R4`) and cache posture match Routing §3; nothing in `(auth)`, `(account)`, `(admin)`, cart or checkout cached or indexed"
+      - label: "13 — The screen renders correctly against **both** the Prism mock **and** the real `ecp-api`"
+  - type: markdown
+    attributes:
+      value: |
+        Set `Work Type`, `Module`, `Priority`, `Sprint`, `Release`, `Size`, `Risk` and `Layer` on the
+        **project item**, not with labels — the Project fields are the authoritative classification.
