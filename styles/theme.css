@@ -51,6 +51,7 @@
 
   /* Layout — §2 max content width, via the max-w-* namespace. */
   --container-content: 1440px;
+  --grid-template-columns-catalog: 18rem minmax(0, 1fr);
 
   /* Motion — ADR-0026's five named presets, exactly these and no others. */
   --ease-out-motion: cubic-bezier(0, 0, 0.2, 1);
