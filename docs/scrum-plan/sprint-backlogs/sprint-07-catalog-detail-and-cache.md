@@ -33,28 +33,28 @@ dependencies; estimates, `S07`, `G3`, and milestone dates are unchanged.
 
 ### `US-CAT-03` View Product Details (8 pts) — `/p/[productId]`, **R1**
 
-- [ ] **Four independent `<Suspense>` boundaries**, per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §4.1 — product/variants/price · availability · reviews · related. The page awaits only the first
-- [ ] Availability renders **labelled as advisory** and never disables add-to-cart — the binding check is at checkout
-- [ ] A failed reviews fetch renders a section-level empty state; a failed recommendations fetch removes the rail **silently**, with nothing said to the customer
-- [ ] `loading.tsx` skeleton in the shape of the page; each boundary carries its own fallback rather than one page-wide spinner
-- [ ] `not-found.tsx` for an unpublished/removed product that offers the containing category (`E1`) and does not explain why
-- [ ] Hand-written Zod parsers for the product, variant, and rating-summary payloads
-- [ ] Vitest + axe, including a test per boundary that asserts the _other three_ still render when it throws
+- [x] **Four independent `<Suspense>` boundaries**, per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §4.1 — product/variants/price · availability · reviews · related. The page awaits only the first
+- [x] Availability renders **labelled as advisory** and never disables add-to-cart — the binding check is at checkout
+- [x] A failed reviews fetch renders a section-level empty state; a failed recommendations fetch removes the rail **silently**, with nothing said to the customer
+- [x] `loading.tsx` skeleton in the shape of the page; each boundary carries its own fallback rather than one page-wide spinner
+- [x] `not-found.tsx` for an unpublished/removed product that offers the containing category (`E1`) and does not explain why
+- [x] Hand-written Zod parsers for the product, variant, and rating-summary payloads
+- [x] Vitest + axe, including a test per boundary that asserts the _other three_ still render when it throws
 
 ### `US-CAT-04` Select Product Variant (3 pts) — `/p/[productId]`
 
-- [ ] Dimension selectors; partial selection shows the price range and keeps add-to-cart disabled (`A1`)
-- [ ] Non-existent and zero-stock combinations marked before selection (`A2`)
-- [ ] `E1` — an impossible combination keeps the rest of the selection intact rather than clearing it
-- [ ] Selection is URL state, so a variant is linkable and the page stays `R1`
-- [ ] Vitest + axe
+- [x] Dimension selectors; partial selection shows the price range and keeps add-to-cart disabled (`A1`)
+- [x] Non-existent and zero-stock combinations marked before selection (`A2`)
+- [x] `E1` — an impossible combination keeps the rest of the selection intact rather than clearing it
+- [x] Selection is URL state, so a variant is linkable and the page stays `R1`
+- [x] Vitest + axe
 
 ### `EN-FE-SHELL-2` Boundary placement and `<Suspense>` discipline (9 pts)
 
-- [ ] `loading.tsx` / `error.tsx` / `not-found.tsx` placed per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §8 across **every** route group delivered so far, not only the new ones
-- [ ] The rule written down: a boundary exists per independently-fetched section, and a section that may fail without the page failing **must** have one
-- [ ] A lint or test-level check that a new route segment without a `loading.tsx` is caught in review rather than at a gate
-- [ ] Vitest + axe on the shared fallback components
+- [x] `loading.tsx` / `error.tsx` / `not-found.tsx` placed per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §8 across **every** route group delivered so far, not only the new ones
+- [x] The rule written down: a boundary exists per independently-fetched section, and a section that may fail without the page failing **must** have one
+- [x] A lint or test-level check that a new route segment without a `loading.tsx` is caught in review rather than at a gate
+- [x] Vitest + axe on the shared fallback components
 
 **Boundary rule.** Every independently-fetched section owns a `<Suspense>`
 boundary and shaped fallback. A section that may fail without the page failing

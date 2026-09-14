@@ -1,31 +1,29 @@
 ---
-
 name: development-governance
 description: >
-Governs implementation work by keeping project documentation, GitHub Issues,
-GitHub Projects, and the internal Sprint Plan synchronized with actual
-development. Use this skill during feature implementation, bug fixing,
-refactoring, architectural changes, or any coding task where implementation
-may diverge from documented requirements. Require explicit user approval
-before accepting undocumented changes, reflect approved changes in the
-relevant documentation, update GitHub Issues and GitHub Projects as work
-progresses, and keep the project's Sprint Plan synchronized with actual
-development status.
-compatibility: >
-Intended for Codex working inside a Git repository. Requires access to project
-documentation and Git. GitHub synchronization requires GitHub CLI (`gh`) or
-equivalent GitHub integration with permission to read and update Issues and
-Projects.
+  Governs implementation work by keeping project documentation, GitHub Issues,
+  GitHub Projects, and the internal Sprint Plan synchronized with actual
+  development. Use this skill during feature implementation, bug fixing,
+  refactoring, architectural changes, or any coding task where implementation
+  may diverge from documented requirements. Require explicit user approval
+  before accepting undocumented changes, reflect approved changes in the
+  relevant documentation, update GitHub Issues and GitHub Projects as work
+  progresses, and keep the project's Sprint Plan synchronized with actual
+  development status.
 metadata:
-version: "1.0.0"
-category: "development-governance"
-----------------------------------
+  version: "1.0.0"
+  category: "development-governance"
+---
 
 # Development Governance
 
 ## Purpose
 
 Use this skill as the governance layer for implementation work.
+
+It is intended for Codex in a Git repository with access to project
+documentation and Git. GitHub synchronization requires the GitHub CLI (`gh`)
+or an equivalent integration that can read and update Issues and Projects.
 
 The project documentation is the source of truth for intended behavior,
 requirements, architecture, interfaces, constraints, acceptance criteria, and
@@ -41,6 +39,13 @@ This skill enforces three invariants:
 2. GitHub Issues and GitHub Projects must reflect the real implementation
    state.
 3. The internal Sprint Plan must reflect the real implementation state.
+
+## Commit Authority
+
+The user is the sole person authorized to create Git commits. Do not run
+`git commit`, amend a commit, create a commit through another Git interface, or
+ask another agent to do so. Leave all changes staged or unstaged for the user
+to inspect and commit manually.
 
 Do not treat synchronization as an optional cleanup activity at the end of the
 task. Perform it continuously at meaningful development checkpoints.
@@ -562,17 +567,9 @@ Documentation must describe the intended project state.
 
 # Git Commit Discipline
 
-When appropriate, include related documentation synchronization with the
-implementation that required it.
-
-Do not commit a specification-changing implementation while leaving its
-approved documentation update for an unspecified later task.
-
-Before committing, inspect the diff and verify that no accidental unrelated
-changes are included.
-
-Follow repository-specific commit conventions from `AGENTS.md` or other project
-instructions.
+Do not create commits. The user alone reviews and commits changes manually.
+Before handoff, inspect the diff and clearly report the changes that are ready
+for the user to commit, including any related documentation synchronization.
 
 # Conflict Resolution
 
