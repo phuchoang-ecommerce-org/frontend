@@ -28,6 +28,17 @@ export const ProblemSchema = z
     instance: z.string(),
     correlationId: z.string().uuid().optional(),
     errors: z.array(FieldErrorSchema),
+    // Only product-unavailable responses populate this safe recovery data.
+    // It remains part of the problem envelope so the one API client can parse
+    // a 404 before the product route chooses its recovery UI.
+    recovery: z
+      .object({
+        category: z
+          .object({ id: z.string(), name: z.string(), slug: z.string() })
+          .strict(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

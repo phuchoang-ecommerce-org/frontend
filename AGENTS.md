@@ -8,4 +8,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-You can find the document implementation plan in [docs](../docs-extract/)
+You can find the document implementation plan in [Docs](../docs-extract/)
+
+You can find the Sprint plan of this project in [Plan](docs/scrum-plan)

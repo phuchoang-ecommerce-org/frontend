@@ -139,12 +139,19 @@ const eslintConfig = defineConfig([
             },
             // I-5: components/ui and components/layout import nothing from features/ or lib/api.
             {
-              from: { element: { type: ["components-ui", "components-layout"] } },
+              from: {
+                element: { type: ["components-ui", "components-layout"] },
+              },
               allow: [
                 {
                   to: {
                     element: {
-                      type: ["components-ui", "components-layout", "lib-motion", "lib-utils"],
+                      type: [
+                        "components-ui",
+                        "components-layout",
+                        "lib-motion",
+                        "lib-utils",
+                      ],
                     },
                   },
                 },
@@ -209,7 +216,7 @@ const eslintConfig = defineConfig([
   // (Data Fetching.md §3, Integration Contract §2).
   {
     files: ["**/*.{ts,tsx}"],
-    ignores: ["lib/api/money.ts", "**/*.test.{ts,tsx}"],
+    ignores: ["lib/api/money.ts", "lib/utils/money.ts", "**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": [
         "error",
@@ -220,7 +227,8 @@ const eslintConfig = defineConfig([
             "Do not coerce Money.amount to a number for arithmetic. Use lib/api's formatMoney at the presentation layer only.",
         },
         {
-          selector: "UnaryExpression[operator='+'] MemberExpression[property.name='amount']",
+          selector:
+            "UnaryExpression[operator='+'] MemberExpression[property.name='amount']",
           message: "Do not coerce Money.amount with unary +.",
         },
       ],

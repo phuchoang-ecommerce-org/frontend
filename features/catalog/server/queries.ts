@@ -1,5 +1,7 @@
 import "server-only";
 
+import { z } from "zod";
+
 import {
   apiQuery,
   asProductId,
@@ -17,7 +19,18 @@ import {
   type CategoryNode,
   type ProductSummary,
 } from "../schema/category";
-import { ProductSchema, type Product } from "../schema/product";
+import {
+  ProductSchema,
+  RatingSummarySchema,
+  RecommendationSchema,
+  ReviewPageSchema,
+  VariantSchema,
+  type Product,
+  type RatingSummary,
+  type Recommendation,
+  type Review,
+  type Variant,
+} from "../schema/product";
 import { catalogCacheTags } from "./cache-tags";
 
 export type CatalogSort = "price" | "createdAt" | "popularity";
@@ -69,19 +82,90 @@ export async function listCategoryProducts(
 }
 
 /**
- * getProduct (paths/catalog.yaml#productById, security: []). Cache policy
- * is explicit `no-store` for now — the production `force-cache` + tags
- * policy (Data Fetching.md §2.3/§7) is deferred to the sprint that builds
- * real catalog revalidation.
+ * R1 catalog detail is cacheable for one hour. Product and per-variant tags
+ * are intentionally distinct so the Sprint 9 event handler can invalidate a
+ * precise read without flushing the category tree.
  */
 export async function getProduct(productId: ProductId): Promise<Product> {
   return apiQuery(
     {
       path: "/products/{productId}",
       pathParams: { productId },
-      cache: "no-store",
+      cache: catalogCache([catalogCacheTags.product(productId)]),
     },
     ProductSchema,
+  );
+}
+
+export async function listProductVariants(
+  productId: ProductId,
+): Promise<Variant[]> {
+  return apiQuery(
+    {
+      path: "/products/{productId}/variants",
+      pathParams: { productId },
+      cache: catalogCache([catalogCacheTags.product(productId)]),
+    },
+    z.array(VariantSchema),
+  );
+}
+
+export async function getProductVariant(
+  productId: ProductId,
+  variantId: string,
+): Promise<Variant> {
+  return apiQuery(
+    {
+      path: "/products/{productId}/variants/{variantId}",
+      pathParams: { productId, variantId },
+      cache: catalogCache([
+        catalogCacheTags.product(productId),
+        catalogCacheTags.variant(variantId),
+      ]),
+    },
+    VariantSchema,
+  );
+}
+
+export async function getProductRatingSummary(
+  productId: ProductId,
+): Promise<RatingSummary> {
+  return apiQuery(
+    {
+      path: "/products/{productId}/rating-summary",
+      pathParams: { productId },
+      cache: catalogCache([catalogCacheTags.product(productId)]),
+    },
+    RatingSummarySchema,
+  );
+}
+
+export async function listProductReviews(
+  productId: ProductId,
+): Promise<Review[]> {
+  const reviews = await apiQuery(
+    {
+      path: "/products/{productId}/reviews",
+      pathParams: { productId },
+      query: { size: "3" },
+      cache: catalogCache([catalogCacheTags.product(productId)]),
+    },
+    ReviewPageSchema,
+  );
+  return reviews.items;
+}
+
+export async function listRelatedProducts(
+  productId: ProductId,
+): Promise<Recommendation[]> {
+  return apiQuery(
+    {
+      path: "/products/{productId}/related-products",
+      pathParams: { productId },
+      query: { size: "4" },
+      cache: catalogCache([catalogCacheTags.product(productId)]),
+    },
+    z.array(RecommendationSchema),
   );
 }
 

@@ -3369,6 +3369,13 @@ export interface components {
             /** Format: int32 */
             sortOrder?: number;
         };
+        /** @description Storefront-safe timing for an active automatic promotion. This is display metadata only; it neither authorises a price nor changes the binding price resolved at order placement. */
+        ActivePromotion: {
+            /** Format: date-time */
+            validFrom: string;
+            /** Format: date-time */
+            validUntil: string;
+        };
         /**
          * @description Availability as a **shopper** may see it.
          *
@@ -3398,6 +3405,8 @@ export interface components {
             listPrice: components["schemas"]["Money"];
             /** @description Present only while a flash sale or automatic promotion applies (`FR-PRM-06`). Advisory for display; the binding price is fixed at order placement (`BR-ORD-06`). */
             promotionalPrice?: components["schemas"]["Money"];
+            /** @description The safe storefront period metadata for the promotion represented by `promotionalPrice`. Present only while that reduced price is active. */
+            activePromotion?: components["schemas"]["ActivePromotion"];
             /** @description Attribute values that identify this variant, e.g. `{"size": "M"}`. */
             options?: {
                 [key: string]: string;
@@ -3485,6 +3494,11 @@ export interface components {
             reviews?: components["schemas"]["ReviewPage"];
             /** @description Omitted when the recommendation capability is unavailable (`NFR-AVAIL-02`, `FR-SCH-07`). */
             relatedProducts?: components["schemas"]["ProductSummary"][];
+        };
+        ProductUnavailable: components["schemas"]["Problem"] & {
+            recovery: {
+                category: components["schemas"]["CategoryRef"];
+            };
         };
         PublicationChange: {
             publicationStatus: components["schemas"]["PublicationStatus"];
@@ -4916,6 +4930,16 @@ export interface components {
             };
             content?: never;
         };
+        /** @description `ECP-GEN-4040` — the requested storefront product is unavailable. The response deliberately does not disclose why, but includes its safe containing-category recovery link. */
+        ProductUnavailable: {
+            headers: {
+                "X-Correlation-Id": components["headers"]["CorrelationId"];
+                [name: string]: unknown;
+            };
+            content: {
+                "application/problem+json": components["schemas"]["ProductUnavailable"];
+            };
+        };
         /**
          * @description `ECP-INV-4091` — insufficient available stock for one or more lines (`BR-INV-01`, `FR-ORD-06`).
          *     **This is an expected outcome under peak load, not an exceptional one.** It is the visible surface of the optimistic-locking oversell guarantee (`ADR-0011`), and a client that renders it as a generic failure will show a checkout error where it should show "someone else just took the last one" (`Integration Contract` §4.4). Being a `409`, it may succeed later; the client may retry.
@@ -6198,7 +6222,7 @@ export interface operations {
                 };
             };
             304: components["responses"]["NotModified"];
-            404: components["responses"]["NotFound"];
+            404: components["responses"]["ProductUnavailable"];
             429: components["responses"]["RateLimited"];
         };
     };

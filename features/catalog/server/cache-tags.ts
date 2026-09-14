@@ -7,5 +7,6 @@ import "server-only";
 export const catalogCacheTags = {
   tree: "category-tree",
   listing: (categoryId: string) => `category-listing:${categoryId}`,
+  product: (productId: string) => `product:${productId}`,
   variant: (variantId: string) => `variant:${variantId}`,
 } as const;
