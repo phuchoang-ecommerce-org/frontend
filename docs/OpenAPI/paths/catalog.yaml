@@ -16,36 +16,45 @@ categories:
       (`FR-CAT-05`). Cacheable: `ETag` supports the `NFR-PERF-01` p95 <= 300 ms
       catalog target.
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-01]
       fr: [FR-CAT-05, FR-CAT-07]
       br: [BR-CAT-03]
     parameters:
-      - $ref: '../components/parameters.yaml#/IfNoneMatch'
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/IfNoneMatch"
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
       - name: rootId
         in: query
         required: false
         description: Return the subtree beneath this category instead of the whole tree.
-        schema: { $ref: '../components/schemas/common.yaml#/Id' }
+        schema: { $ref: "../components/schemas/common.yaml#/Id" }
       - name: maxDepth
         in: query
         required: false
         schema: { type: integer, format: int32, minimum: 1 }
     responses:
-      '200':
+      "200":
         description: The category tree.
         headers:
-          ETag: { $ref: '../components/headers.yaml#/ETag' }
+          ETag: { $ref: "../components/headers.yaml#/ETag" }
         content:
           application/json:
             schema:
               type: array
-              items: { $ref: '../components/schemas/catalog.yaml#/CategoryNode' }
-      '304': { $ref: '../components/responses.yaml#/NotModified' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+              items:
+                { $ref: "../components/schemas/catalog.yaml#/CategoryNode" }
+      "304": { $ref: "../components/responses.yaml#/NotModified" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   post:
     operationId: createCategory
     tags: [Product Catalog & Category]
@@ -59,24 +68,24 @@ categories:
       A parent that would create a cycle in the tree is rejected (`BR-CAT-03`).
       The change is audited (`FR-AUD-02`).
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/CategoryWrite' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/CategoryWrite" }
     responses:
-      '201':
+      "201":
         description: Category created.
         headers:
-          Location: { $ref: '../components/headers.yaml#/Location' }
+          Location: { $ref: "../components/headers.yaml#/Location" }
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Category' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Category" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 featuredCategories:
   get:
@@ -94,24 +103,24 @@ featuredCategories:
       fr: [FR-CAT-06]
       br: []
     parameters:
-      - $ref: '../components/parameters.yaml#/IfNoneMatch'
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/IfNoneMatch"
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '200':
+      "200":
         description: Featured categories.
         headers:
-          ETag: { $ref: '../components/headers.yaml#/ETag' }
+          ETag: { $ref: "../components/headers.yaml#/ETag" }
         content:
           application/json:
             schema:
               type: array
-              items: { $ref: '../components/schemas/catalog.yaml#/Category' }
-      '304': { $ref: '../components/responses.yaml#/NotModified' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+              items: { $ref: "../components/schemas/catalog.yaml#/Category" }
+      "304": { $ref: "../components/responses.yaml#/NotModified" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 categoryById:
   parameters:
-    - $ref: '../components/parameters.yaml#/CategoryId'
+    - $ref: "../components/parameters.yaml#/CategoryId"
   get:
     operationId: getCategory
     tags: [Product Catalog & Category]
@@ -120,21 +129,29 @@ categoryById:
       Includes the root-to-parent `ancestors` chain so a deep link can render
       breadcrumbs without walking the tree (`UC-CAT-01` A2).
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-01]
       fr: [FR-CAT-05]
       br: []
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '200':
+      "200":
         description: The category.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Category' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Category" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   patch:
     operationId: updateCategory
     tags: [Product Catalog & Category]
@@ -148,23 +165,23 @@ categoryById:
       fr: [FR-ADM-02]
       br: [BR-CAT-03]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/CategoryWrite' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/CategoryWrite" }
     responses:
-      '200':
+      "200":
         description: Updated category.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Category' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Category" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   delete:
     operationId: deleteCategory
     tags: [Product Catalog & Category]
@@ -180,22 +197,22 @@ categoryById:
       fr: [FR-ADM-02]
       br: [BR-CAT-03]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '204':
+      "204":
         description: Deleted, or already absent.
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '409':
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "409":
         description: The category still holds products or child categories.
         content:
           application/problem+json:
-            schema: { $ref: '../components/schemas/common.yaml#/Problem' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/common.yaml#/Problem" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 categoryProducts:
   parameters:
-    - $ref: '../components/parameters.yaml#/CategoryId'
+    - $ref: "../components/parameters.yaml#/CategoryId"
   get:
     operationId: listCategoryProducts
     tags: [Product Catalog & Category]
@@ -206,16 +223,24 @@ categoryProducts:
       Only `PUBLISHED` products appear (`BR-CAT-02`). Sortable fields are
       `price`, `createdAt`, and `popularity` — each is index-backed (`P10`).
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-02]
       fr: [FR-CAT-03, FR-CAT-08]
       br: [BR-CAT-02]
     parameters:
-      - $ref: '../components/parameters.yaml#/Cursor'
-      - $ref: '../components/parameters.yaml#/PageSize'
-      - $ref: '../components/parameters.yaml#/Sort'
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - $ref: "../components/parameters.yaml#/PageSize"
+      - $ref: "../components/parameters.yaml#/Sort"
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
       - name: brand
         in: query
         required: false
@@ -223,7 +248,7 @@ categoryProducts:
       - name: priceFrom
         in: query
         required: false
-        description: 'Inclusive lower bound, as a decimal string (see `Money`).'
+        description: "Inclusive lower bound, as a decimal string (see `Money`)."
         schema: { type: string, pattern: '^[0-9]{1,15}(\.[0-9]{1,4})?$' }
       - name: priceTo
         in: query
@@ -234,14 +259,15 @@ categoryProducts:
         required: false
         schema: { type: boolean }
     responses:
-      '200':
+      "200":
         description: Products in the category.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/ProductSummaryPage' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema:
+              { $ref: "../components/schemas/catalog.yaml#/ProductSummaryPage" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 products:
   get:
@@ -255,20 +281,28 @@ products:
       for anyone else. This is the operator-facing product list `UC-ADM-01`
       works from.
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-02, UC-ADM-01]
       fr: [FR-CAT-03, FR-ADM-01]
       br: [BR-CAT-02]
     parameters:
-      - $ref: '../components/parameters.yaml#/Cursor'
-      - $ref: '../components/parameters.yaml#/PageSize'
-      - $ref: '../components/parameters.yaml#/Sort'
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/Cursor"
+      - $ref: "../components/parameters.yaml#/PageSize"
+      - $ref: "../components/parameters.yaml#/Sort"
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
       - name: categoryId
         in: query
         required: false
-        schema: { $ref: '../components/schemas/common.yaml#/Id' }
+        schema: { $ref: "../components/schemas/common.yaml#/Id" }
       - name: brand
         in: query
         required: false
@@ -277,16 +311,18 @@ products:
         in: query
         required: false
         description: Staff and Administrator only.
-        schema: { $ref: '../components/schemas/catalog.yaml#/PublicationStatus' }
+        schema:
+          { $ref: "../components/schemas/catalog.yaml#/PublicationStatus" }
     responses:
-      '200':
+      "200":
         description: Matching products.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/ProductSummaryPage' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema:
+              { $ref: "../components/schemas/catalog.yaml#/ProductSummaryPage" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   post:
     operationId: createProduct
     tags: [Product Catalog & Category]
@@ -300,28 +336,28 @@ products:
       fr: [FR-ADM-01, FR-CAT-01]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/ProductWrite' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/ProductWrite" }
     responses:
-      '201':
+      "201":
         description: Product created, in `DRAFT`.
         headers:
-          Location: { $ref: '../components/headers.yaml#/Location' }
+          Location: { $ref: "../components/headers.yaml#/Location" }
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Product' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Product" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productById:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
+    - $ref: "../components/parameters.yaml#/ProductId"
   get:
     operationId: getProduct
     tags: [Product Catalog & Category]
@@ -337,25 +373,33 @@ productById:
       (`NFR-AVAIL-02`). Availability shown here is advisory; the binding check
       happens inside the order-placement transaction (`ADR-0008` §4).
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-03]
       fr: [FR-CAT-01, FR-CAT-04, FR-INV-07]
       br: [BR-CAT-01, BR-CAT-02]
     parameters:
-      - $ref: '../components/parameters.yaml#/IfNoneMatch'
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/IfNoneMatch"
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '200':
+      "200":
         description: The product.
         headers:
-          ETag: { $ref: '../components/headers.yaml#/ETag' }
+          ETag: { $ref: "../components/headers.yaml#/ETag" }
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Product' }
-      '304': { $ref: '../components/responses.yaml#/NotModified' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Product" }
+      "304": { $ref: "../components/responses.yaml#/NotModified" }
+      "404": { $ref: "../components/responses.yaml#/ProductUnavailable" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   patch:
     operationId: updateProduct
     tags: [Product Catalog & Category]
@@ -371,23 +415,23 @@ productById:
       fr: [FR-ADM-01]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/ProductWrite' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/ProductWrite" }
     responses:
-      '200':
+      "200":
         description: Updated product.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Product' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Product" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   delete:
     operationId: deleteProduct
     tags: [Product Catalog & Category]
@@ -402,22 +446,22 @@ productById:
       fr: [FR-ADM-01]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '204':
+      "204":
         description: Deleted, or already absent.
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '409':
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "409":
         description: Stock or open orders exist. Unpublish instead.
         content:
           application/problem+json:
-            schema: { $ref: '../components/schemas/common.yaml#/Problem' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/common.yaml#/Problem" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productPublication:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
+    - $ref: "../components/parameters.yaml#/ProductId"
   put:
     operationId: setProductPublication
     tags: [Product Catalog & Category]
@@ -434,27 +478,28 @@ productPublication:
       fr: [FR-ADM-01]
       br: [BR-CAT-02]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/PublicationChange' }
+          schema:
+            { $ref: "../components/schemas/catalog.yaml#/PublicationChange" }
     responses:
-      '200':
+      "200":
         description: Publication state applied.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Product' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Product" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productVariants:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
+    - $ref: "../components/parameters.yaml#/ProductId"
   get:
     operationId: listProductVariants
     tags: [Product Catalog & Category]
@@ -465,90 +510,110 @@ productVariants:
       render a price range rather than a single price and cannot add to cart
       (`UC-CAT-04` A1).
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-04]
       fr: [FR-CAT-02]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
       - name: options
         in: query
         required: false
-        description: 'Attribute selection, e.g. `options=size:M&options=colour:blue`.'
-        schema: { type: array, items: { type: string, pattern: '^[a-zA-Z0-9_-]+:.+$' } }
+        description: "Attribute selection, e.g. `options=size:M&options=colour:blue`."
+        schema:
+          {
+            type: array,
+            items: { type: string, pattern: "^[a-zA-Z0-9_-]+:.+$" },
+          }
     responses:
-      '200':
+      "200":
         description: Matching variants.
         content:
           application/json:
             schema:
               type: array
-              items: { $ref: '../components/schemas/catalog.yaml#/Variant' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+              items: { $ref: "../components/schemas/catalog.yaml#/Variant" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   post:
     operationId: addProductVariant
     tags: [Product Catalog & Category]
     summary: Add a variant
-    description: 'SKU uniqueness is enforced platform-wide (`BR-CAT-01`).'
+    description: "SKU uniqueness is enforced platform-wide (`BR-CAT-01`)."
     x-ecp-roles: [STAFF, ADMINISTRATOR]
     x-ecp-traces:
       uc: [UC-ADM-01]
       fr: [FR-ADM-01, FR-CAT-02]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/VariantWrite' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/VariantWrite" }
     responses:
-      '201':
+      "201":
         description: Variant added.
         headers:
-          Location: { $ref: '../components/headers.yaml#/Location' }
+          Location: { $ref: "../components/headers.yaml#/Location" }
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Variant' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '409':
+            schema: { $ref: "../components/schemas/catalog.yaml#/Variant" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "409":
         description: The SKU is already in use, or was previously used and may not be reused.
         content:
           application/problem+json:
-            schema: { $ref: '../components/schemas/common.yaml#/Problem' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/common.yaml#/Problem" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productVariantById:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
-    - $ref: '../components/parameters.yaml#/VariantId'
+    - $ref: "../components/parameters.yaml#/ProductId"
+    - $ref: "../components/parameters.yaml#/VariantId"
   get:
     operationId: getProductVariant
     tags: [Product Catalog & Category]
     summary: Get one variant
-    description: 'The selected purchasable configuration, with its own SKU, price and availability (`FR-CAT-02`).'
+    description: "The selected purchasable configuration, with its own SKU, price and availability (`FR-CAT-02`)."
     security: []
-    x-ecp-roles: [GUEST, CUSTOMER, STAFF, WAREHOUSE_OPERATOR, CUSTOMER_SUPPORT, ADMINISTRATOR]
+    x-ecp-roles:
+      [
+        GUEST,
+        CUSTOMER,
+        STAFF,
+        WAREHOUSE_OPERATOR,
+        CUSTOMER_SUPPORT,
+        ADMINISTRATOR,
+      ]
     x-ecp-traces:
       uc: [UC-CAT-04]
       fr: [FR-CAT-02]
       br: []
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '200':
+      "200":
         description: The variant.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Variant' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Variant" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
   delete:
     operationId: removeProductVariant
     tags: [Product Catalog & Category]
@@ -562,23 +627,23 @@ productVariantById:
       fr: [FR-ADM-01]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '204':
+      "204":
         description: Removed, or already absent.
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '409':
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "409":
         description: Stock or open orders reference this variant.
         content:
           application/problem+json:
-            schema: { $ref: '../components/schemas/common.yaml#/Problem' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/common.yaml#/Problem" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productVariantPrice:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
-    - $ref: '../components/parameters.yaml#/VariantId'
+    - $ref: "../components/parameters.yaml#/ProductId"
+    - $ref: "../components/parameters.yaml#/VariantId"
   put:
     operationId: changeVariantPrice
     tags: [Product Catalog & Category]
@@ -594,27 +659,27 @@ productVariantPrice:
       fr: [FR-ADM-01]
       br: [BR-ORD-06]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/PriceChange' }
+          schema: { $ref: "../components/schemas/catalog.yaml#/PriceChange" }
     responses:
-      '200':
+      "200":
         description: New price applied.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/Variant' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/Variant" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productImages:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
+    - $ref: "../components/parameters.yaml#/ProductId"
   post:
     operationId: addProductImage
     tags: [Product Catalog & Category]
@@ -624,50 +689,51 @@ productImages:
       uc: [UC-ADM-01]
       fr: [FR-ADM-01, FR-CAT-01]
       br: []
-    description: 'Adds an image to the product gallery (`FR-CAT-01`).'
+    description: "Adds an image to the product gallery (`FR-CAT-01`)."
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/ProductImageWrite' }
+          schema:
+            { $ref: "../components/schemas/catalog.yaml#/ProductImageWrite" }
     responses:
-      '201':
+      "201":
         description: Image added.
         headers:
-          Location: { $ref: '../components/headers.yaml#/Location' }
+          Location: { $ref: "../components/headers.yaml#/Location" }
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/ProductImage' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '404': { $ref: '../components/responses.yaml#/NotFound' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema: { $ref: "../components/schemas/catalog.yaml#/ProductImage" }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "404": { $ref: "../components/responses.yaml#/NotFound" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productImageById:
   parameters:
-    - $ref: '../components/parameters.yaml#/ProductId'
-    - $ref: '../components/parameters.yaml#/ImageId'
+    - $ref: "../components/parameters.yaml#/ProductId"
+    - $ref: "../components/parameters.yaml#/ImageId"
   delete:
     operationId: removeProductImage
     tags: [Product Catalog & Category]
     summary: Remove a product image
-    description: 'Idempotent (`Integration Contract` §2.1).'
+    description: "Idempotent (`Integration Contract` §2.1)."
     x-ecp-roles: [STAFF, ADMINISTRATOR]
     x-ecp-traces:
       uc: [UC-ADM-01]
       fr: [FR-ADM-01]
       br: []
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     responses:
-      '204':
+      "204":
         description: Removed, or already absent.
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 productBulkAmendments:
   post:
@@ -685,19 +751,23 @@ productBulkAmendments:
       fr: [FR-ADM-01]
       br: [BR-CAT-01]
     parameters:
-      - $ref: '../components/parameters.yaml#/CorrelationIdHeader'
+      - $ref: "../components/parameters.yaml#/CorrelationIdHeader"
     requestBody:
       required: true
       content:
         application/json:
-          schema: { $ref: '../components/schemas/catalog.yaml#/BulkProductAmendment' }
+          schema:
+            { $ref: "../components/schemas/catalog.yaml#/BulkProductAmendment" }
     responses:
-      '200':
+      "200":
         description: Per-item outcomes.
         content:
           application/json:
-            schema: { $ref: '../components/schemas/catalog.yaml#/BulkAmendmentResult' }
-      '400': { $ref: '../components/responses.yaml#/ValidationFailed' }
-      '401': { $ref: '../components/responses.yaml#/Unauthenticated' }
-      '403': { $ref: '../components/responses.yaml#/Forbidden' }
-      '429': { $ref: '../components/responses.yaml#/RateLimited' }
+            schema:
+              {
+                $ref: "../components/schemas/catalog.yaml#/BulkAmendmentResult",
+              }
+      "400": { $ref: "../components/responses.yaml#/ValidationFailed" }
+      "401": { $ref: "../components/responses.yaml#/Unauthenticated" }
+      "403": { $ref: "../components/responses.yaml#/Forbidden" }
+      "429": { $ref: "../components/responses.yaml#/RateLimited" }
