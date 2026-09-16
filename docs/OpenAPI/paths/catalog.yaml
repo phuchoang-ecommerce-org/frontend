@@ -207,7 +207,31 @@ categoryById:
         description: The category still holds products or child categories.
         content:
           application/problem+json:
-            schema: { $ref: "../components/schemas/common.yaml#/Problem" }
+            schema:
+              allOf:
+                - $ref: "../components/schemas/common.yaml#/Problem"
+                - type: object
+                  required: [blocking]
+                  properties:
+                    blocking:
+                      type: object
+                      required: [productCount, childCategoryCount]
+                      properties:
+                        productCount:
+                          { type: integer, format: int32, minimum: 0 }
+                        childCategoryCount:
+                          { type: integer, format: int32, minimum: 0 }
+            example:
+              type: https://ecp.example/errors/ECP-CAT-4090
+              title: Category still contains assigned records
+              status: 409
+              code: ECP-CAT-4090
+              instance: /api/v1/categories/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12
+              correlationId: 0f9c2b3a-4d61-4e2f-9c77-1a2b3c4d5e6f
+              errors: []
+              blocking:
+                productCount: 12
+                childCategoryCount: 3
       "429": { $ref: "../components/responses.yaml#/RateLimited" }
 
 categoryProducts:

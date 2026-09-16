@@ -3,7 +3,8 @@ import Link from "next/link";
 
 const ADMIN_LINKS = [
   { href: "/admin", label: "Dashboard" },
-  { href: "/admin/catalog", label: "Catalog" },
+  { href: "/admin/products", label: "Products" },
+  { href: "/admin/categories", label: "Categories" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/promotions", label: "Promotions" },
 ] as const;
@@ -18,7 +19,10 @@ export interface AdminShellProps {
 export function AdminShell({ children }: AdminShellProps) {
   return (
     <div className="flex min-h-full">
-      <nav aria-label="Admin" className="flex w-56 shrink-0 flex-col gap-1 border-r border-border bg-surface p-3">
+      <nav
+        aria-label="Admin"
+        className="w-56 flex shrink-0 flex-col gap-1 border-r border-border bg-surface p-3"
+      >
         {ADMIN_LINKS.map((link) => (
           <Link
             key={link.href}

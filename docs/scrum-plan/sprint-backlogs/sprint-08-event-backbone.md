@@ -1,4 +1,5 @@
-<!-- Generated from the canonical PM-docs plan. Do not edit directly; run `node PM-docs/scripts/generate-lane-plans.mjs`. -->
+<!-- Derived from the canonical PM-docs plan. Sprint review notes below record
+     the frontend implementation state until the canonical generator is run. -->
 
 # Frontend Plan — Sprint 08 — Event Backbone: Outbox & Kafka
 
@@ -29,18 +30,18 @@ The frontend lane spends the sprint **a full sprint ahead of the backend**, buil
 > Built entirely against the Prism mock. `createProduct` and friends do not exist in `ecp-api` until Sprint 09; they exist in `openapi.yaml` today, which is the point.
 
 ### `US-ADM-01` Manage Products (8 pts) — `/admin/products`, `/admin/products/new`, `/admin/products/[productId]`, **R4**
-- [ ] The `(admin)` list → detail → action shape per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §7.2, on the group's `SameSite=Strict` posture
-- [ ] Reads `listProducts`, `getProduct`, `listProductVariants`; writes `createProduct`, `updateProduct`, `deleteProduct`, `setProductPublication`, `addProductVariant`, `removeProductVariant`, `changeVariantPrice`, `addProductImage`, `removeProductImage`, `amendProductsInBulk`
-- [ ] `E1` duplicate SKU and `E3` removal of a product with stock or open orders render as **named, designed outcomes** — `E3` offers unpublishing, which is the actual commercial intent
-- [ ] `E4` — a failed validation applies nothing; the form is whole-or-nothing, and the UI must not leave half a submission applied
-- [ ] **The save confirmation says the storefront updates within seconds, not on save** ([`ADR-0038`](../../../SA-docs/01-system/ADR/ADR-0038-event-driven-catalog-revalidation.md)). Wording it as immediate is the mistake this sprint can still cheaply avoid
+- [x] The `(admin)` list → detail → action shape per [`Routing.md`](../../../SA-docs/03-frontend/Routing.md) §7.2, on the group's `SameSite=Strict` posture
+- [x] Reads `listProducts`, `getProduct`, `listProductVariants`; writes `createProduct`, `updateProduct`, `deleteProduct`, `setProductPublication`, `addProductVariant`, `removeProductVariant`, `changeVariantPrice`, `addProductImage`, `removeProductImage`, `amendProductsInBulk`
+- [x] `E1` duplicate SKU and `E3` removal of a product with stock or open orders render as **named, designed outcomes** — `E3` offers unpublishing, which is the actual commercial intent
+- [x] `E4` — a failed validation applies nothing; the form is whole-or-nothing, and the UI must not leave half a submission applied
+- [x] **The save confirmation says the storefront updates within seconds, not on save** ([`ADR-0038`](../../../SA-docs/01-system/ADR/ADR-0038-event-driven-catalog-revalidation.md)). Wording it as immediate is the mistake this sprint can still cheaply avoid
 - [ ] Hand-written Zod parsers for every admin catalog payload; `loading.tsx` per segment; `<Suspense>` per independently-fetched section
-- [ ] Vitest + axe, including the dense-table keyboard path
+- [x] Vitest + axe, including the dense-table keyboard path
 
 ### `US-ADM-02` Manage Categories (5 pts) — `/admin/categories`, `/admin/categories/[categoryId]`, **R4**
-- [ ] Reads `listCategories`, `getCategory`, `listCategoryProducts`; writes `createCategory`, `updateCategory`, `deleteCategory`
-- [ ] `E1` cycle and `E2` removal-while-occupied render with **the counts the server returns** — the client never computes them and never pre-empts the check
-- [ ] Parent reassignment UI makes the cycle constraint visible before submission, while still letting the server be the authority
+- [x] Reads `listCategories`, `getCategory`, `listCategoryProducts`; writes `createCategory`, `updateCategory`, `deleteCategory`
+- [x] `E1` cycle and `E2` removal-while-occupied render with **the counts the server returns** — the client never computes them and never pre-empts the check
+- [x] Parent reassignment UI makes the cycle constraint visible before submission, while still letting the server be the authority
 - [ ] Vitest + axe
 
 ---
@@ -58,7 +59,11 @@ Every item satisfies the [frontend Definition of Done](../definition-of-done.md)
 
 ## Review Notes
 
-<!-- filled at Sprint Review -->
+- Frontend implementation delivered: R4 product and category administration routes, Server Actions, no-store reads, shaped loading states, and named conflict recovery.
+- Contract amended for category deletion: the `409` payload now returns authoritative `productCount` and `childCategoryCount`. The local and canonical `../docs-extract` OpenAPI copies were synchronized and regenerated types are current.
+- Focused Vitest suite passes, including the typed blocker and dense-table keyboard/axe path. The production build reaches application compilation; this environment then fails to download Inter from Google Fonts.
+- Prism runtime validation and category-specific axe coverage remain before Sprint Review. Real `ecp-api` validation remains the Sprint 09/G4 dependency.
+- GitHub issue and Project updates were skipped because GitHub CLI authentication was invalid.
 
 ## Retrospective
 

@@ -15,6 +15,11 @@ const fetchingPages = [
   "app/(account)/account/profile/page.tsx",
   "app/(account)/account/addresses/page.tsx",
   "app/(account)/account/addresses/[addressId]/page.tsx",
+  "app/(admin)/admin/products/page.tsx",
+  "app/(admin)/admin/products/new/page.tsx",
+  "app/(admin)/admin/products/[productId]/page.tsx",
+  "app/(admin)/admin/categories/page.tsx",
+  "app/(admin)/admin/categories/[categoryId]/page.tsx",
 ];
 
 function hasLoadingBoundary(page: string) {

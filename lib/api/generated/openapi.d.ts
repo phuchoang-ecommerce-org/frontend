@@ -3142,6 +3142,13 @@ export interface components {
             correlationId?: components["schemas"]["CorrelationId"];
             /** @description Field-level detail. Always present; empty except on validation failures, where **every** failing field is reported in one response rather than only the first (`Integration Contract` §4.3). */
             errors: components["schemas"]["FieldError"][];
+            /** @description Server-authoritative facts that explain why a requested operation cannot proceed. Present only on operation-specific conflict responses; clients must not derive these values from cached reads. */
+            blocking?: {
+                /** Format: int32 */
+                productCount?: number;
+                /** Format: int32 */
+                childCategoryCount?: number;
+            };
         };
         RegistrationRequest: {
             /** Format: email */
@@ -6019,7 +6026,29 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["Problem"];
+                    /**
+                     * @example {
+                     *       "type": "https://ecp.example/errors/ECP-CAT-4090",
+                     *       "title": "Category still contains assigned records",
+                     *       "status": 409,
+                     *       "code": "ECP-CAT-4090",
+                     *       "instance": "/api/v1/categories/018f3c2a-7b41-7c9e-9f10-2a4b6c8d0e12",
+                     *       "correlationId": "0f9c2b3a-4d61-4e2f-9c77-1a2b3c4d5e6f",
+                     *       "errors": [],
+                     *       "blocking": {
+                     *         "productCount": 12,
+                     *         "childCategoryCount": 3
+                     *       }
+                     *     }
+                     */
+                    "application/problem+json": components["schemas"]["Problem"] & {
+                        blocking: {
+                            /** Format: int32 */
+                            productCount: number;
+                            /** Format: int32 */
+                            childCategoryCount: number;
+                        };
+                    };
                 };
             };
             429: components["responses"]["RateLimited"];

@@ -39,6 +39,16 @@ export const ProblemSchema = z
       })
       .strict()
       .optional(),
+    // A category-delete conflict carries authoritative counts. Keeping this a
+    // narrow optional extension means the shared API client can parse the
+    // response before the administration feature chooses its recovery UI.
+    blocking: z
+      .object({
+        productCount: z.number().int().min(0),
+        childCategoryCount: z.number().int().min(0),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
