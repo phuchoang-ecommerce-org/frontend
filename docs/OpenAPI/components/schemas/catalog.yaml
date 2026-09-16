@@ -14,8 +14,8 @@ Category:
   type: object
   required: [id, name, slug, depth]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
-    parentId: { $ref: "./common.yaml#/Id" }
+    id: { $ref: './common.yaml#/Id' }
+    parentId: { $ref: './common.yaml#/Id' }
     name: { type: string }
     slug:
       type: string
@@ -29,36 +29,36 @@ Category:
       description: >-
         Root-to-parent chain, so a deep link can render breadcrumbs without
         walking the tree (`UC-CAT-01` A2).
-      items: { $ref: "#/CategoryRef" }
+      items: { $ref: '#/CategoryRef' }
 
 CategoryRef:
   type: object
   required: [id, name, slug]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
-    name: { type: string, examples: ["Outerwear"] }
-    slug: { type: string, examples: ["outerwear"] }
+    id: { $ref: './common.yaml#/Id' }
+    name: { type: string, examples: ['Outerwear'] }
+    slug: { type: string, examples: ['outerwear'] }
 
 CategoryNode:
   description: >-
     A category with its children inlined. Categories nest to arbitrary depth
     (`FR-CAT-05`), so this schema is recursive.
   allOf:
-    - $ref: "#/Category"
+    - $ref: '#/Category'
     - type: object
       properties:
         children:
           type: array
-          items: { $ref: "#/CategoryNode" }
+          items: { $ref: '#/CategoryNode' }
 
 CategoryPage:
   allOf:
-    - $ref: "./common.yaml#/PageEnvelope"
+    - $ref: './common.yaml#/PageEnvelope'
     - type: object
       properties:
         items:
           type: array
-          items: { $ref: "#/Category" }
+          items: { $ref: '#/Category' }
 
 CategoryWrite:
   type: object
@@ -67,7 +67,7 @@ CategoryWrite:
   properties:
     name: { type: string }
     parentId:
-      $ref: "./common.yaml#/Id"
+      $ref: './common.yaml#/Id'
       description: >-
         Moving a category moves its descendants with it. A parent that would
         create a cycle is rejected (`BR-CAT-03`).
@@ -82,23 +82,23 @@ Variant:
     independently tracked stock (`FR-CAT-02`).
   required: [id, sku, listPrice, active]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
+    id: { $ref: './common.yaml#/Id' }
     sku:
       type: string
-      examples: ["TRJ-BLK-M"]
+      examples: ['TRJ-BLK-M']
       description: >-
         Unique platform-wide (`BR-CAT-01`). A removed SKU is never reused
         (`UC-ADM-01`).
-    name: { type: string, examples: ["Trail Runner Jacket — Black, M"] }
-    listPrice: { $ref: "./common.yaml#/Money" }
+    name: { type: string, examples: ['Trail Runner Jacket — Black, M'] }
+    listPrice: { $ref: './common.yaml#/Money' }
     promotionalPrice:
-      $ref: "./common.yaml#/Money"
+      $ref: './common.yaml#/Money'
       description: >-
         Present only while a flash sale or automatic promotion applies
         (`FR-PRM-06`). Advisory for display; the binding price is fixed at order
         placement (`BR-ORD-06`).
     activePromotion:
-      $ref: "#/ActivePromotion"
+      $ref: '#/ActivePromotion'
       description: >-
         The safe storefront period metadata for the promotion represented by
         `promotionalPrice`. Present only while that reduced price is active.
@@ -108,7 +108,7 @@ Variant:
       additionalProperties: { type: string }
     weightGrams: { type: integer, format: int32, minimum: 0 }
     active: { type: boolean }
-    availability: { $ref: "./inventory.yaml#/VariantAvailability" }
+    availability: { $ref: './inventory.yaml#/VariantAvailability' }
 
 ActivePromotion:
   type: object
@@ -123,7 +123,7 @@ ActivePromotion:
 
 ProductUnavailable:
   allOf:
-    - $ref: "./common.yaml#/Problem"
+    - $ref: './common.yaml#/Problem'
     - type: object
       description: >-
         The storefront-safe form of a product-unavailable response. It does not
@@ -134,21 +134,15 @@ ProductUnavailable:
           type: object
           required: [category]
           properties:
-            category: { $ref: "#/CategoryRef" }
+            category: { $ref: '#/CategoryRef' }
 
 ProductImage:
   type: object
   required: [id, url]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
-    url:
-      {
-        type: string,
-        format: uri,
-        examples:
-          ["https://cdn.ecp.example/products/trail-runner-jacket/front.jpg"],
-      }
-    altText: { type: string, examples: ["Trail Runner Jacket, front view"] }
+    id: { $ref: './common.yaml#/Id' }
+    url: { type: string, format: uri, examples: ['https://cdn.ecp.example/products/trail-runner-jacket/front.jpg'] }
+    altText: { type: string, examples: ['Trail Runner Jacket, front view'] }
     sortOrder: { type: integer, format: int32 }
 
 ProductSummary:
@@ -156,18 +150,18 @@ ProductSummary:
   description: The listing-shaped projection of a product.
   required: [id, name, slug, publicationStatus]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
+    id: { $ref: './common.yaml#/Id' }
     name: { type: string }
     slug: { type: string }
     brand: { type: string }
-    publicationStatus: { $ref: "#/PublicationStatus" }
+    publicationStatus: { $ref: '#/PublicationStatus' }
     primaryImageUrl: { type: string, format: uri }
     priceFrom:
-      $ref: "./common.yaml#/Money"
+      $ref: './common.yaml#/Money'
       description: >-
         Lowest current variant price. A listing shows a range rather than a
         single price where variants differ (`UC-CAT-04` A1).
-    priceTo: { $ref: "./common.yaml#/Money" }
+    priceTo: { $ref: './common.yaml#/Money' }
     averageRating:
       type: number
       format: double
@@ -187,12 +181,12 @@ ProductSummary:
 
 ProductSummaryPage:
   allOf:
-    - $ref: "./common.yaml#/PageEnvelope"
+    - $ref: './common.yaml#/PageEnvelope'
     - type: object
       properties:
         items:
           type: array
-          items: { $ref: "#/ProductSummary" }
+          items: { $ref: '#/ProductSummary' }
 
 Product:
   type: object
@@ -203,31 +197,26 @@ Product:
     rendering (`NFR-AVAIL-02`).
   required: [id, name, slug, publicationStatus, variants, images, categories]
   properties:
-    id: { $ref: "./common.yaml#/Id" }
-    name: { type: string, examples: ["Trail Runner Jacket"] }
-    slug: { type: string, examples: ["trail-runner-jacket"] }
-    description:
-      {
-        type: string,
-        examples:
-          ["A packable, waterproof shell for wet-weather trail running."],
-      }
-    brand: { type: string, examples: ["Northpeak"] }
-    publicationStatus: { $ref: "#/PublicationStatus" }
+    id: { $ref: './common.yaml#/Id' }
+    name: { type: string, examples: ['Trail Runner Jacket'] }
+    slug: { type: string, examples: ['trail-runner-jacket'] }
+    description: { type: string, examples: ['A packable, waterproof shell for wet-weather trail running.'] }
+    brand: { type: string, examples: ['Northpeak'] }
+    publicationStatus: { $ref: '#/PublicationStatus' }
     publishedAt: { type: string, format: date-time }
     categories:
       type: array
-      items: { $ref: "#/CategoryRef" }
+      items: { $ref: '#/CategoryRef' }
     attributes:
       type: object
       description: Open-shaped product attributes (`catalog_product.attributes`).
       additionalProperties: true
     images:
       type: array
-      items: { $ref: "#/ProductImage" }
+      items: { $ref: '#/ProductImage' }
     variants:
       type: array
-      items: { $ref: "#/Variant" }
+      items: { $ref: '#/Variant' }
     averageRating: { type: number, format: double, minimum: 1, maximum: 5 }
     reviewCount: { type: integer, format: int32, minimum: 0 }
     reviews:
@@ -235,13 +224,13 @@ Product:
         A short page of recent published reviews. **Omitted when the review
         capability is unavailable** rather than failing the response
         (`NFR-AVAIL-02`).
-      $ref: "./review.yaml#/ReviewPage"
+      $ref: './review.yaml#/ReviewPage'
     relatedProducts:
       type: array
       description: >-
         Omitted when the recommendation capability is unavailable
         (`NFR-AVAIL-02`, `FR-SCH-07`).
-      items: { $ref: "#/ProductSummary" }
+      items: { $ref: '#/ProductSummary' }
 
 ProductWrite:
   type: object
@@ -251,7 +240,7 @@ ProductWrite:
     name: { type: string }
     description: { type: string }
     brand: { type: string }
-    categoryId: { $ref: "./common.yaml#/Id" }
+    categoryId: { $ref: './common.yaml#/Id' }
     attributes:
       type: object
       additionalProperties: true
@@ -265,7 +254,7 @@ VariantWrite:
       type: string
       description: Must be unique platform-wide; a previously removed SKU may not be reused (`BR-CAT-01`).
     name: { type: string }
-    listPrice: { $ref: "./common.yaml#/Money" }
+    listPrice: { $ref: './common.yaml#/Money' }
     options:
       type: object
       additionalProperties: { type: string }
@@ -281,7 +270,7 @@ PriceChange:
   required: [listPrice, reason]
   additionalProperties: false
   properties:
-    listPrice: { $ref: "./common.yaml#/Money" }
+    listPrice: { $ref: './common.yaml#/Money' }
     reason: { type: string }
 
 PublicationChange:
@@ -289,7 +278,7 @@ PublicationChange:
   required: [publicationStatus]
   additionalProperties: false
   properties:
-    publicationStatus: { $ref: "#/PublicationStatus" }
+    publicationStatus: { $ref: '#/PublicationStatus' }
     reason: { type: string }
 
 ProductImageWrite:
@@ -316,8 +305,8 @@ BulkProductAmendment:
         type: object
         required: [productId, amendment]
         properties:
-          productId: { $ref: "./common.yaml#/Id" }
-          amendment: { $ref: "#/ProductWrite" }
+          productId: { $ref: './common.yaml#/Id' }
+          amendment: { $ref: '#/ProductWrite' }
 
 BulkAmendmentResult:
   type: object
@@ -329,7 +318,7 @@ BulkAmendmentResult:
         type: object
         required: [productId, applied]
         properties:
-          productId: { $ref: "./common.yaml#/Id" }
+          productId: { $ref: './common.yaml#/Id' }
           applied: { type: boolean }
           code:
             type: string

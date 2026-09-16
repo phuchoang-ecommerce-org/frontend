@@ -1,12 +1,11 @@
 import "server-only";
 
 /**
- * Shared with catalog's EN-WIRE-3 invalidation namespace. EN-FE-API-3 must
- * reuse these exact strings when its signed catalog-event handler arrives.
+ * Shared cache-tag contract for R1 catalog reads and Sprint 9's signed event
+ * callback. These strings intentionally match docs/Event Contract exactly.
  */
 export const catalogCacheTags = {
-  tree: "category-tree",
-  listing: (categoryId: string) => `category-listing:${categoryId}`,
   product: (productId: string) => `product:${productId}`,
-  variant: (variantId: string) => `variant:${variantId}`,
+  variantPrice: (sku: string) => `variant-price:${sku}`,
+  category: (slug: string) => `category:${slug}`,
 } as const;

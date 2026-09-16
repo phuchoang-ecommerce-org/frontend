@@ -43,7 +43,7 @@ async function resolveCategory(slug: string[]) {
   const tree = await listCategories();
   const matchingNode = findCategoryBySlugPath(tree, slug);
   if (!matchingNode) notFound();
-  const category = await getCategory(matchingNode.id);
+  const category = await getCategory(matchingNode.id, matchingNode.slug);
   return { tree, category };
 }
 
@@ -121,10 +121,14 @@ async function CategoryProducts({
   sort?: CatalogSort | undefined;
 }) {
   const { category } = await resolveCategory(slug);
-  const products = await listCategoryProducts(category.id, {
-    ...(cursor ? { cursor } : {}),
-    ...(sort ? { sort } : {}),
-  });
+  const products = await listCategoryProducts(
+    category.id,
+    slug.at(-1) ?? category.slug,
+    {
+      ...(cursor ? { cursor } : {}),
+      ...(sort ? { sort } : {}),
+    },
+  );
   return (
     <ProductGrid
       categoryName={category.name}

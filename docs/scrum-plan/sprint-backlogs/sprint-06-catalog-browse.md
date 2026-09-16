@@ -45,7 +45,7 @@
 - [ ] Web-vitals reporter wired and reporting LCP/CLS/INP for the `R1` class
 - [ ] Confirm the routes are genuinely static (build output shows them prerendered) — this is asserted at IH-1 row 7 and cheaper to establish now
 
-**Cache-tag handoff (Sprint 06):** `category-tree`, `category-listing:{id}`, and `variant:{id}` are the canonical shared namespaces. `{id}` is the concrete category or variant identifier; backend may append query-specific cache suffixes beneath `category-listing:{id}`. Frontend revalidation and `EN-FE-API-3` (Sprint 09) must use these namespace strings verbatim.
+**Cache-tag handoff (reconciled in Sprint 09):** `product:{id}`, `variant-price:{sku}`, and `category:{slug}` are the canonical shared namespaces. `{id}`, `{sku}`, and `{slug}` are the concrete product identifier, variant SKU, and affected category slug. The signed event callback maps catalog events to these tags as specified in [`Private Web Revalidation Callback v1`](../../Event%20Contract/web-revalidation.v1.md); frontend revalidation and `EN-FE-API-3` must use these namespace strings verbatim.
 
 ---
 

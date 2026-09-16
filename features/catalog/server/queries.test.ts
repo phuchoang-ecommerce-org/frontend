@@ -21,11 +21,11 @@ describe("product query cache policy", () => {
     });
   });
 
-  it("uses product and variant tags for a variant read", async () => {
+  it("uses its enclosing product tag for a variant read", async () => {
     apiQuery.mockResolvedValue({});
     await getProductVariant("product" as never, "variant");
     expect(apiQuery.mock.calls.at(-1)?.[0]).toMatchObject({
-      cache: { revalidate: 3600, tags: ["product:product", "variant:variant"] },
+      cache: { revalidate: 3600, tags: ["product:product"] },
     });
   });
 });

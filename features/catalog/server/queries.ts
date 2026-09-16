@@ -37,26 +37,31 @@ export type CatalogSort = "price" | "createdAt" | "popularity";
 
 const CATALOG_REVALIDATE_SECONDS = 3600;
 
-function catalogCache(tags: string[]) {
-  return { revalidate: CATALOG_REVALIDATE_SECONDS, tags };
+function catalogCache(tags: string[] = []) {
+  return {
+    revalidate: CATALOG_REVALIDATE_SECONDS,
+    ...(tags.length > 0 ? { tags } : {}),
+  };
 }
 
 export async function listCategories(): Promise<CategoryNode[]> {
   return apiQuery(
-    { path: "/categories", cache: catalogCache([catalogCacheTags.tree]) },
+    // The tree has a time floor only: a fetch tag must be chosen before this
+    // response reveals every slug, so it cannot safely claim one category tag.
+    { path: "/categories", cache: catalogCache() },
     CategoryTreeSchema,
   );
 }
 
-export async function getCategory(categoryId: string): Promise<Category> {
+export async function getCategory(
+  categoryId: string,
+  categorySlug: string,
+): Promise<Category> {
   return apiQuery(
     {
       path: "/categories/{categoryId}",
       pathParams: { categoryId },
-      cache: catalogCache([
-        catalogCacheTags.tree,
-        catalogCacheTags.listing(categoryId),
-      ]),
+      cache: catalogCache([catalogCacheTags.category(categorySlug)]),
     },
     CategorySchema,
   );
@@ -64,6 +69,7 @@ export async function getCategory(categoryId: string): Promise<Category> {
 
 export async function listCategoryProducts(
   categoryId: string,
+  categorySlug: string,
   options: { cursor?: string; sort?: CatalogSort } = {},
 ): Promise<Page<ProductSummary>> {
   const envelope = await apiQuery(
@@ -74,7 +80,7 @@ export async function listCategoryProducts(
         ...cursorQuery(options.cursor),
         ...(options.sort ? { sort: options.sort } : {}),
       },
-      cache: catalogCache([catalogCacheTags.listing(categoryId)]),
+      cache: catalogCache([catalogCacheTags.category(categorySlug)]),
     },
     ProductSummaryPageSchema,
   );
@@ -82,9 +88,9 @@ export async function listCategoryProducts(
 }
 
 /**
- * R1 catalog detail is cacheable for one hour. Product and per-variant tags
- * are intentionally distinct so the Sprint 9 event handler can invalidate a
- * precise read without flushing the category tree.
+ * R1 catalog detail is cacheable for one hour. Product changes invalidate the
+ * complete product representation; price-only consumers may additionally use
+ * the `variant-price:{sku}` namespace when their request is SKU-shaped.
  */
 export async function getProduct(productId: ProductId): Promise<Product> {
   return apiQuery(
@@ -118,10 +124,7 @@ export async function getProductVariant(
     {
       path: "/products/{productId}/variants/{variantId}",
       pathParams: { productId, variantId },
-      cache: catalogCache([
-        catalogCacheTags.product(productId),
-        catalogCacheTags.variant(variantId),
-      ]),
+      cache: catalogCache([catalogCacheTags.product(productId)]),
     },
     VariantSchema,
   );

@@ -44,14 +44,14 @@ Money:
       type: string
       pattern: '^-?[0-9]{1,15}(\.[0-9]{1,4})?$'
       description: Decimal amount, up to 15 integer digits and 4 fractional digits.
-      examples: ["129.99"]
+      examples: ['129.99']
     currency:
       type: string
-      pattern: "^[A-Z]{3}$"
+      pattern: '^[A-Z]{3}$'
       description: >-
         ISO 4217 alphabetic code. A single currency is in force for this release
         (`A-10`); multi-currency is deferred (SRS §8).
-      examples: ["VND"]
+      examples: ['VND']
 
 Quantity:
   type: integer
@@ -79,7 +79,7 @@ Address:
     postalCode: { type: string }
     countryCode:
       type: string
-      pattern: "^[A-Z]{2}$"
+      pattern: '^[A-Z]{2}$'
       description: ISO 3166-1 alpha-2.
     phone: { type: string }
 
@@ -103,7 +103,7 @@ Page:
       description: >-
         Opaque cursor for the following page. **Absent when there are no further
         pages.** A client never constructs, parses, or stores meaning into one.
-      examples: ["eyJvIjoxMjM0fQ"]
+      examples: ['eyJvIjoxMjM0fQ']
     total:
       type: integer
       format: int64
@@ -127,7 +127,7 @@ PageEnvelope:
       type: array
       items: {}
     page:
-      $ref: "#/Page"
+      $ref: '#/Page'
 
 FieldError:
   type: object
@@ -140,15 +140,15 @@ FieldError:
       description: >-
         Dotted path to the offending field, with bracket indexing for array
         members. Not an RFC 6901 JSON Pointer.
-      examples: ["shippingAddress.postalCode", "lines[0].quantity"]
+      examples: ['shippingAddress.postalCode', 'lines[0].quantity']
     code:
       type: string
-      pattern: "^ECP-[A-Z]{3}-[0-9]{4}$"
-      examples: ["ECP-GEN-4002"]
+      pattern: '^ECP-[A-Z]{3}-[0-9]{4}$'
+      examples: ['ECP-GEN-4002']
     detail:
       type: string
       description: Developer-facing context. Not user-facing copy.
-      examples: ["Required."]
+      examples: ['Required.']
 
 Problem:
   type: object
@@ -162,8 +162,8 @@ Problem:
     type:
       type: string
       format: uri
-      description: "Stable URI for the error code: `https://ecp.example/errors/<CODE>`."
-      examples: ["https://ecp.example/errors/ECP-INV-4091"]
+      description: 'Stable URI for the error code: `https://ecp.example/errors/<CODE>`.'
+      examples: ['https://ecp.example/errors/ECP-INV-4091']
     title:
       type: string
       description: >-
@@ -171,7 +171,7 @@ Problem:
         for display to an end user** — the client maps `code` to its own
         localised message, which is what keeps the deferred multi-language
         capability (SRS §8) a client concern.
-      examples: ["Insufficient available stock"]
+      examples: ['Insufficient available stock']
     status:
       type: integer
       format: int32
@@ -179,26 +179,26 @@ Problem:
       maximum: 599
     code:
       type: string
-      pattern: "^ECP-[A-Z]{3}-[0-9]{4}$"
+      pattern: '^ECP-[A-Z]{3}-[0-9]{4}$'
       description: >-
         **The contract.** A stable machine-readable string clients branch on;
         never reworded, reused, or removed within a major version
         (`Integration Contract` §4.5 rule 1). `<DOMAIN>` is an SRS §2.2 domain
         code or `GEN`. Clients match the whole code, never a substring.
-      examples: ["ECP-INV-4091"]
+      examples: ['ECP-INV-4091']
     detail:
       type: string
       description: >-
         Context for a developer or a log. **Never** contains a credential, a
         token, a payment detail, or a raw request payload (`NFR-SEC-07`), and on
         a 5xx never an exception type, stack frame, or SQL fragment (§4.5 rule 3).
-      examples: ["SKU TS-BLU-M has 2 units available; 5 were requested."]
+      examples: ['SKU TS-BLU-M has 2 units available; 5 were requested.']
     instance:
       type: string
       description: The request path that produced this error.
-      examples: ["/api/v1/orders"]
+      examples: ['/api/v1/orders']
     correlationId:
-      $ref: "#/CorrelationId"
+      $ref: '#/CorrelationId'
     errors:
       type: array
       description: >-
@@ -206,7 +206,7 @@ Problem:
         where **every** failing field is reported in one response rather than
         only the first (`Integration Contract` §4.3).
       items:
-        $ref: "#/FieldError"
+        $ref: '#/FieldError'
     blocking:
       type: object
       description: >-
