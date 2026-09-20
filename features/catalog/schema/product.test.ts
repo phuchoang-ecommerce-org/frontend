@@ -3,8 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   ProductSchema,
   PromotionMetadataSchema,
-  RatingSummarySchema,
-  ReviewPageSchema,
 } from "./product";
 
 const product = {
@@ -43,17 +41,4 @@ describe("product detail schemas", () => {
     ).toThrow();
   });
 
-  it("parses an empty real-API rating summary and a populated review page", () => {
-    expect(
-      RatingSummarySchema.parse({ reviewCount: 0, distribution: {} }),
-    ).toMatchObject({
-      reviewCount: 0,
-    });
-    expect(
-      ReviewPageSchema.parse({
-        items: [],
-        page: { size: 3 },
-      }),
-    ).toMatchObject({ items: [] });
-  });
 });

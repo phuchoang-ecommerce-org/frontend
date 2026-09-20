@@ -7,18 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { SectionEmpty, SectionSkeleton } from "@/components/ui/section-state";
 import { formatMoney, type ProductId } from "@/lib/api";
 
-import type {
-  CategoryRef,
-  Product,
-  Recommendation,
-  Variant,
-} from "../schema/product";
-import {
-  getProductRatingSummary,
-  listProductReviews,
-  listProductVariants,
-  listRelatedProducts,
-} from "../server/queries";
+import type { CategoryRef, Product, Variant } from "../schema/product";
+import { listProductVariants } from "../server/queries";
 import { VariantSelector } from "./variant-selector";
 
 function promotionPeriod(variant: Variant) {
@@ -142,99 +132,6 @@ export async function AvailabilitySection({
       </p>
     </section>
   );
-}
-
-export async function ReviewsSection({ productId }: { productId: ProductId }) {
-  const result = await Promise.all([
-    getProductRatingSummary(productId),
-    listProductReviews(productId),
-  ]).catch(() => null);
-  if (!result) {
-    return (
-      <SectionEmpty
-        description="Reviews are unavailable right now. Product details and options are still available."
-        title="Reviews unavailable"
-      />
-    );
-  }
-  const [summary, reviews] = result;
-  return (
-    <section
-      className="rounded-card border border-border bg-surface p-4"
-      aria-labelledby="reviews-heading"
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 id="reviews-heading" className="text-base font-medium text-primary">
-          Reviews
-        </h2>
-        <p className="text-sm text-neutral-700">
-          {summary.averageRating
-            ? `${summary.averageRating.toFixed(1)} / 5`
-            : "No rating yet"}{" "}
-          · {summary.reviewCount} reviews
-        </p>
-      </div>
-      {reviews.length ? (
-        <ul className="mt-3 space-y-3" role="list">
-          {reviews.map((review) => (
-            <li
-              key={review.id}
-              className="first:pt-0 border-t border-border pt-3 first:border-0"
-            >
-              <p className="text-sm font-medium text-primary">
-                {review.title ?? `${review.rating} out of 5`}
-              </p>
-              {review.body ? (
-                <p className="mt-1 text-sm text-neutral-700">{review.body}</p>
-              ) : null}
-              <p className="mt-1 text-sm text-neutral-700">
-                {review.authorDisplayName ?? "Verified shopper"}
-              </p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-sm text-neutral-700">No reviews yet.</p>
-      )}
-    </section>
-  );
-}
-
-function RecommendationRail({ products }: { products: Recommendation[] }) {
-  if (!products.length) return null;
-  return (
-    <section aria-labelledby="related-heading">
-      <h2 id="related-heading" className="text-lg font-semibold text-primary">
-        Related products
-      </h2>
-      <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4" role="list">
-        {products.map((product) => (
-          <li key={product.id}>
-            <Link
-              className="duration-elevate block rounded-card border border-border bg-surface p-3 transition-shadow hover:shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              href={`/p/${product.id}`}
-            >
-              <p className="font-medium text-primary">{product.name}</p>
-              {product.priceFrom ? (
-                <p className="mt-1 text-sm text-neutral-700">
-                  {formatMoney(product.priceFrom)}
-                </p>
-              ) : null}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
-export async function RecommendationsSection({
-  productId,
-}: {
-  productId: ProductId;
-}) {
-  const products = await listRelatedProducts(productId).catch(() => null);
-  return products ? <RecommendationRail products={products} /> : null;
 }
 
 export function ProductUnavailable({ category }: { category: CategoryRef }) {

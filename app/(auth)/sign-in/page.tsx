@@ -1,4 +1,4 @@
-import { SignInForm } from "./sign-in-form";
+import { SignInForm } from "@/features/identity/components/sign-in-form";
 
 export const metadata = { robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";

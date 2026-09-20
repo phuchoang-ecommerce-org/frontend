@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 
 import { ApiProblem } from "@/lib/api";
+import { ProductReviewsSection } from "@/features/review/components/product-reviews-section";
+import { ProductRecommendationsSection } from "@/features/search/components/product-recommendations-section";
 import {
   AvailabilitySection,
   ProductPrimary,
   ProductUnavailable,
-  RecommendationsSection,
-  ReviewsSection,
 } from "@/features/catalog/components/product-detail";
 import { asProductId, getProduct } from "@/features/catalog/server/queries";
 
@@ -48,12 +48,12 @@ export default async function ProductPage({
           <AvailabilitySection productId={productId} />
         </Suspense>
         <Suspense fallback={<SectionSkeleton />}>
-          <ReviewsSection productId={productId} />
+          <ProductReviewsSection productId={productId} />
         </Suspense>
       </div>
       <div className="mt-6">
         <Suspense fallback={<SectionSkeleton lines={2} />}>
-          <RecommendationsSection productId={productId} />
+          <ProductRecommendationsSection productId={productId} />
         </Suspense>
       </div>
     </main>

@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { formatMoney } from "@/lib/utils/money";
 
 import type { Variant } from "../schema/product";
+import { productVariantHref, selectedVariantId } from "../url/variant";
 import {
   matchingPriceRange,
   selectedOptionsForVariant,
@@ -16,7 +17,7 @@ import {
 } from "./variant-selection";
 
 export function VariantSelector({ variants }: { variants: Variant[] }) {
-  const variantId = useSearchParams().get("variant");
+  const variantId = selectedVariantId(useSearchParams());
   return (
     <VariantSelectorControls
       key={variantId}
@@ -49,12 +50,7 @@ function VariantSelectorControls({
     const next = { ...selected, [dimension]: value };
     setSelected(next);
     const exact = selectedVariant(variants, next);
-    router.replace(
-      exact ? `${pathname}?variant=${encodeURIComponent(exact.id)}` : pathname,
-      {
-        scroll: false,
-      },
-    );
+    router.replace(productVariantHref(pathname, exact?.id), { scroll: false });
   }
 
   if (Object.keys(dimensions).length === 0) return null;

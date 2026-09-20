@@ -1,5 +1,4 @@
 import { z } from "zod";
-
 export const InventoryAdjustmentInputSchema = z
   .object({
     sku: z.string().trim().min(1),

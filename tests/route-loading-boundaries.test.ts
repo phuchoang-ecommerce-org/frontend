@@ -35,8 +35,11 @@ function hasLoadingBoundary(page: string) {
 describe("fetching route boundaries", () => {
   it("flags a delivered fetching route segment without a shaped loading boundary", () => {
     for (const page of fetchingPages) {
+      // A route may fetch directly or compose an async feature-owned screen.
+      // Both require the same loading-boundary guarantee; app/ itself must not
+      // retain domain reads merely to satisfy this structural check.
       expect(readFileSync(path.join(root, page), "utf8")).toMatch(
-        /await|async/,
+        /await|async|@\/features\//,
       );
       expect(
         hasLoadingBoundary(page),

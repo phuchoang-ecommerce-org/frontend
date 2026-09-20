@@ -21,14 +21,8 @@ import {
 } from "../schema/category";
 import {
   ProductSchema,
-  RatingSummarySchema,
-  RecommendationSchema,
-  ReviewPageSchema,
   VariantSchema,
   type Product,
-  type RatingSummary,
-  type Recommendation,
-  type Review,
   type Variant,
 } from "../schema/product";
 import { catalogCacheTags } from "./cache-tags";
@@ -127,48 +121,6 @@ export async function getProductVariant(
       cache: catalogCache([catalogCacheTags.product(productId)]),
     },
     VariantSchema,
-  );
-}
-
-export async function getProductRatingSummary(
-  productId: ProductId,
-): Promise<RatingSummary> {
-  return apiQuery(
-    {
-      path: "/products/{productId}/rating-summary",
-      pathParams: { productId },
-      cache: catalogCache([catalogCacheTags.product(productId)]),
-    },
-    RatingSummarySchema,
-  );
-}
-
-export async function listProductReviews(
-  productId: ProductId,
-): Promise<Review[]> {
-  const reviews = await apiQuery(
-    {
-      path: "/products/{productId}/reviews",
-      pathParams: { productId },
-      query: { size: "3" },
-      cache: catalogCache([catalogCacheTags.product(productId)]),
-    },
-    ReviewPageSchema,
-  );
-  return reviews.items;
-}
-
-export async function listRelatedProducts(
-  productId: ProductId,
-): Promise<Recommendation[]> {
-  return apiQuery(
-    {
-      path: "/products/{productId}/related-products",
-      pathParams: { productId },
-      query: { size: "4" },
-      cache: catalogCache([catalogCacheTags.product(productId)]),
-    },
-    z.array(RecommendationSchema),
   );
 }
 
