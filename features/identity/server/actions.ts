@@ -27,6 +27,21 @@ import {
 import { CustomerAddressSchema, CustomerAddressWriteSchema, type CustomerAddress } from "../schema/address";
 import { toActionResult, type ActionResult } from "./error-mapping";
 
+/**
+ * An operator session receives the stricter cookie posture for its whole
+ * lifetime. The role list comes from the validated `POST /sessions` response;
+ * it is not a browser-supplied authorization claim.
+ *
+ * IH-1-04 ratifies this as the practical interpretation of the route-group
+ * requirement: a `/`-scoped cookie has one SameSite attribute, so it cannot
+ * vary per request between storefront and `(admin)` routes.
+ */
+const OPERATOR_ROLES = new Set(["STAFF", "WAREHOUSE_OPERATOR", "CUSTOMER_SUPPORT", "ADMINISTRATOR"]);
+
+function isOperatorSession(account: Account): boolean {
+  return account.roles.some((role) => OPERATOR_ROLES.has(role));
+}
+
 function fieldErrorsFromZod(error: z.ZodError): Record<string, string> {
   return Object.fromEntries(
     error.issues.map((issue) => [issue.path.join(".") || "_form", issue.message]),
@@ -120,7 +135,7 @@ export async function logIn(input: unknown): Promise<ActionResult<PublicSession>
       expiresIn: session.expiresIn,
       account: session.account,
       ...(session.refreshToken !== undefined ? { refreshToken: session.refreshToken } : {}),
-    });
+    }, { admin: isOperatorSession(session.account) });
     return { ok: true, data: toPublicSession(session) };
   } catch (err) {
     return toActionResult<PublicSession>(err);

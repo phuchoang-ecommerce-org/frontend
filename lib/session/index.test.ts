@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const { cookieJar } = vi.hoisted(() => ({
-  cookieJar: new Map<string, { value: string }>(),
+  cookieJar: new Map<string, { value: string; options?: Record<string, unknown> }>(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -9,8 +9,8 @@ vi.mock("next/headers", () => ({
     Promise.resolve({
       get: (name: string) => cookieJar.get(name),
       has: (name: string) => cookieJar.has(name),
-      set: (name: string, value: string) => {
-        cookieJar.set(name, { value });
+      set: (name: string, value: string, options?: Record<string, unknown>) => {
+        cookieJar.set(name, options === undefined ? { value } : { value, options });
       },
       delete: (name: string) => {
         cookieJar.delete(name);
@@ -59,6 +59,30 @@ describe("createSession / destroySession", () => {
     expect(cookieJar.has(SESSION_COOKIE_NAME)).toBe(true);
     expect(cookieJar.has(CSRF_COOKIE_NAME)).toBe(true);
     await expect(getAccessToken()).resolves.toBe("at-1");
+  });
+
+  it("sets Lax cookies for a standard session", async () => {
+    await createSession({ accessToken: "at-1", expiresIn: 3600, account: { id: "a1" } });
+
+    expect(cookieJar.get(SESSION_COOKIE_NAME)?.options).toMatchObject({
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+    });
+    expect(cookieJar.get(CSRF_COOKIE_NAME)?.options).toMatchObject({
+      httpOnly: false,
+      secure: true,
+      sameSite: "lax",
+      path: "/",
+    });
+  });
+
+  it("sets Strict session and CSRF cookies for an operator session", async () => {
+    await createSession({ accessToken: "at-1", expiresIn: 3600, account: { id: "a1" } }, { admin: true });
+
+    expect(cookieJar.get(SESSION_COOKIE_NAME)?.options).toMatchObject({ sameSite: "strict" });
+    expect(cookieJar.get(CSRF_COOKIE_NAME)?.options).toMatchObject({ sameSite: "strict" });
   });
 
   it("clears both cookies and the access token", async () => {
