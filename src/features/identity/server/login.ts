@@ -1,22 +1,10 @@
 "use server";
 
-import { headers, cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { requestSession, type BackendSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
+import { checkActionOrigin } from "@/lib/session/csrf";
 import type { FormResult } from "../types";
-
-export async function checkActionOrigin(): Promise<boolean> {
-  const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin");
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 export async function signInWithCredentials(
   email: string,
@@ -40,7 +28,8 @@ export async function signInWithCredentials(
   }
 
   try {
-    const guestCartId = (await cookies()).get("ecp_guest_cart")?.value;
+    const cookieStore = await cookies();
+    const guestCartId = cookieStore.get("ecp_guest_cart")?.value;
     const response = await requestSession(email.trim(), password, guestCartId);
     if (response.status === 429) {
       const seconds = Number(response.headers.get("retry-after"));
@@ -74,6 +63,14 @@ export async function signInWithCredentials(
       };
     }
     await createSession(session);
+    if (
+      guestCartId &&
+      /ecp_guest_cart=.*max-age=0/i.test(
+        response.headers.get("set-cookie") ?? "",
+      )
+    ) {
+      cookieStore.delete("ecp_guest_cart");
+    }
     return { ok: true };
   } catch {
     return {

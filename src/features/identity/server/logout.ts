@@ -2,7 +2,7 @@
 
 import { endSession } from "@/lib/api/identity";
 import { clearSession } from "@/lib/session";
-import { checkActionOrigin } from "./login";
+import { checkActionOrigin } from "@/lib/session/csrf";
 
 export async function logoutAction(): Promise<void> {
   if (!(await checkActionOrigin())) return;

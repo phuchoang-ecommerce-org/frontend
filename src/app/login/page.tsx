@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/features/identity/components/identity-forms";
 import { DevAccountLoginPanel } from "@/features/identity/components/dev-account-login-panel";
@@ -12,8 +13,19 @@ import { getSession } from "@/lib/session";
 
 export const metadata: Metadata = { title: "Sign in | ECP" };
 
-export default async function LoginPage() {
-  if (await getSession()) redirect("/welcome");
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ returnTo?: string }>;
+}) {
+  const requested = (await searchParams).returnTo;
+  const returnTo =
+    requested?.startsWith("/") &&
+    !requested.startsWith("//") &&
+    !requested.includes("\\")
+      ? requested
+      : "/welcome";
+  if (await getSession()) redirect(returnTo);
 
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-stone-950 sm:py-16 [&_button]:min-h-11 [&_input]:h-11">
@@ -51,13 +63,27 @@ export default async function LoginPage() {
             <p className="mt-2 mb-8 text-sm leading-6 text-stone-600">
               Enter your account email and password.
             </p>
-            <LoginForm onSubmit={loginAction} successHref="/welcome" />
+            <LoginForm onSubmit={loginAction} successHref={returnTo} />
+            <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm">
+              <Link
+                href="/register"
+                className="font-medium underline underline-offset-4"
+              >
+                Create an account
+              </Link>
+              <Link
+                href="/forgot-password"
+                className="font-medium underline underline-offset-4"
+              >
+                Forgot password?
+              </Link>
+            </div>
             {devLoginEnabled() && (
               <div className="mt-9 border-t border-stone-200 pt-7">
                 <DevAccountLoginPanel
                   accounts={[...devAccounts]}
                   onSelect={devLoginAction}
-                  returnTo="/welcome"
+                  returnTo={returnTo}
                 />
               </div>
             )}

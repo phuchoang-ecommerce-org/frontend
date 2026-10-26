@@ -12,6 +12,7 @@ export type BackendSession = {
   refreshToken: string;
   expiresIn: number;
   account: Account;
+  cartMergeNotices?: string[];
 };
 
 export async function requestSession(
@@ -24,12 +25,13 @@ export async function requestSession(
 
   return fetch(`${baseUrl.replace(/\/$/, "")}/sessions`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      email,
-      password,
-      ...(guestCartId ? { guestCartId } : {}),
-    }),
+    headers: {
+      "Content-Type": "application/json",
+      ...(guestCartId
+        ? { Cookie: `ecp_guest_cart=${encodeURIComponent(guestCartId)}` }
+        : {}),
+    },
+    body: JSON.stringify({ email, password }),
     cache: "no-store",
   });
 }

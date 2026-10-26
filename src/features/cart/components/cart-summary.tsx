@@ -2,7 +2,13 @@ import Link from "next/link";
 import { Card } from "@/components/ui";
 import type { CartTotals } from "../types";
 
-export function CartSummary({ summary }: { summary: CartTotals }) {
+export function CartSummary({
+  summary,
+  checkoutHref = "/checkout",
+}: {
+  summary: CartTotals;
+  checkoutHref?: string;
+}) {
   return (
     <Card title="Cart summary">
       <dl className="space-y-2 text-sm">
@@ -29,7 +35,7 @@ export function CartSummary({ summary }: { summary: CartTotals }) {
       </dl>
       {summary.canCheckout ? (
         <Link
-          href="/checkout"
+          href={checkoutHref}
           className="mt-4 inline-flex min-h-control items-center rounded-control bg-primary px-4 text-sm font-medium text-primary-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           Checkout
