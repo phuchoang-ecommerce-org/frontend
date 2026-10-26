@@ -1,38 +1,19 @@
 import "server-only";
 
-import { backendRequest } from "@/lib/api/backend";
-import { formatMoney, type Money } from "@/lib/format/money";
-import type { Category, Product, Variant } from "../types";
+import {
+  fetchCategories,
+  fetchCategory,
+  fetchCategoryProducts,
+  fetchProduct,
+  fetchProducts,
+  type ApiCategory,
+  type ApiMoney,
+  type ApiProductSummary,
+} from "@/lib/api/catalog";
+import { formatMoney } from "@/lib/format/money";
+import type { Category, Product, ProductDetailData } from "../types";
 
-type CategoryWire = { id: string; name: string; children: CategoryWire[] };
-type ProductWire = {
-  id: string;
-  name: string;
-  brand?: string;
-  description?: string;
-  primaryImageUrl?: string;
-  priceFrom: Money;
-  priceTo: Money;
-  inStock: boolean | null;
-};
-type VariantWire = {
-  id: string;
-  name: string;
-  active: boolean;
-  listPrice: Money;
-  promotionalPrice: Money;
-  availability: { inStock: boolean } | null;
-};
-type ProductDetailWire = Omit<
-  ProductWire,
-  "priceFrom" | "priceTo" | "inStock"
-> & {
-  images: { url: string; altText?: string }[];
-  variants: VariantWire[];
-};
-type PageWire = { items: ProductWire[]; page: { next: string | null } };
-
-function imageUrl(url?: string): string | undefined {
+function imageUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
   try {
     const parsed = new URL(url);
@@ -44,28 +25,38 @@ function imageUrl(url?: string): string | undefined {
   }
 }
 
-function categoryView(node: CategoryWire): Category {
+function categoryView(node: ApiCategory): Category {
   return {
     id: node.id,
     label: node.name,
-    href: `/categories/${node.id}`,
+    href: `/categories/${encodeURIComponent(node.id)}`,
     children: node.children?.map(categoryView) ?? [],
   };
 }
 
-function productView(item: ProductWire): Product {
+function sameMoney(left?: ApiMoney | null, right?: ApiMoney | null): boolean {
+  return Boolean(
+    left &&
+      right &&
+      left.amount === right.amount &&
+      left.currency === right.currency,
+  );
+}
+
+function productView(item: ApiProductSummary): Product {
+  const priceFrom = formatMoney(item.priceFrom ?? null);
+  const price =
+    item.priceTo && !sameMoney(item.priceFrom, item.priceTo)
+      ? `${priceFrom} – ${formatMoney(item.priceTo)}`
+      : priceFrom;
   return {
     id: item.id,
     name: item.name,
-    href: `/products/${item.id}`,
+    href: `/products/${encodeURIComponent(item.id)}`,
     imageUrl: imageUrl(item.primaryImageUrl),
-    price: formatMoney(item.priceFrom),
-    compareAtPrice:
-      item.priceTo?.amount !== item.priceFrom?.amount
-        ? formatMoney(item.priceTo)
-        : undefined,
+    price,
     availability:
-      item.inStock === null
+      item.inStock == null
         ? "unknown"
         : item.inStock
           ? "available"
@@ -74,87 +65,80 @@ function productView(item: ProductWire): Product {
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const response = await backendRequest("/categories");
-  if (!response.ok) throw new Error("Categories could not be loaded");
-  return ((await response.json()) as CategoryWire[]).map(categoryView);
+  return (await fetchCategories()).map(categoryView);
 }
 
-export async function getProducts(categoryId?: string): Promise<Product[]> {
-  if (categoryId) {
-    const response = await backendRequest(
-      `/categories/${encodeURIComponent(categoryId)}/products?size=100`,
-    );
-    if (!response.ok) throw new Error("Products could not be loaded");
-    return ((await response.json()) as PageWire).items.map(productView);
-  }
-
-  const categoryResponse = await backendRequest("/categories");
-  if (!categoryResponse.ok) throw new Error("Products could not be loaded");
-  const roots = (await categoryResponse.json()) as CategoryWire[];
-  const allCategories = (nodes: CategoryWire[]): CategoryWire[] =>
-    nodes.flatMap((node) => [node, ...allCategories(node.children ?? [])]);
-  const responses = await Promise.all(
-    allCategories(roots).map((category) =>
-      backendRequest(
-        `/categories/${encodeURIComponent(category.id)}/products?size=100`,
-      ),
-    ),
-  );
-  if (responses.some((response) => !response.ok))
-    throw new Error("Products could not be loaded");
-  const pages = await Promise.all(
-    responses.map((response) => response.json() as Promise<PageWire>),
-  );
-  const unique = new Map<string, ProductWire>();
-  for (const page of pages)
-    for (const item of page.items) unique.set(item.id, item);
-  return [...unique.values()].map(productView);
+export async function getProducts(): Promise<{
+  products: Product[];
+  nextCursor?: string;
+}> {
+  const page = await fetchProducts();
+  return {
+    products: page.items.map(productView),
+    ...(page.page.next ? { nextCursor: page.page.next } : {}),
+  };
 }
 
-export async function getCategory(
-  categoryId: string,
-): Promise<{ id: string; name: string } | null> {
-  const response = await backendRequest(
-    `/categories/${encodeURIComponent(categoryId)}`,
-  );
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error("Category could not be loaded");
-  return (await response.json()) as { id: string; name: string };
-}
-
-export async function getProduct(productId: string): Promise<{
+export async function getCategory(categoryId: string): Promise<{
   id: string;
   name: string;
-  brand?: string;
-  description?: string;
-  image?: { url: string; alt: string };
-  variants: (Variant & {
-    price: string;
-    availability: "available" | "unavailable" | "unknown";
-  })[];
+  ancestors: { id: string; name: string }[];
 } | null> {
-  const response = await backendRequest(
-    `/products/${encodeURIComponent(productId)}`,
-  );
-  if (response.status === 404) return null;
-  if (!response.ok) throw new Error("Product could not be loaded");
-  const item = (await response.json()) as ProductDetailWire;
+  const category = await fetchCategory(categoryId);
+  if (!category) return null;
+  return {
+    id: category.id,
+    name: category.name,
+    ancestors:
+      category.ancestors?.map((ancestor) => ({
+        id: ancestor.id,
+        name: ancestor.name,
+      })) ?? [],
+  };
+}
+
+export async function getCategoryProducts(
+  categoryId: string,
+  cursor?: string,
+): Promise<{ products: Product[]; nextCursor?: string } | null> {
+  const page = await fetchCategoryProducts(categoryId, cursor);
+  if (!page) return null;
+  return {
+    products: page.items.map(productView),
+    ...(page.page.next ? { nextCursor: page.page.next } : {}),
+  };
+}
+
+export async function getProduct(
+  productId: string,
+): Promise<ProductDetailData | null> {
+  const item = await fetchProduct(productId);
+  if (!item) return null;
+  const image = [...item.images].sort(
+    (left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0),
+  )[0];
   return {
     id: item.id,
     name: item.name,
-    brand: item.brand,
-    description: item.description,
-    image: item.images?.[0]
+    ...(item.brand ? { brand: item.brand } : {}),
+    ...(item.description ? { description: item.description } : {}),
+    ...(image
       ? {
-          url: imageUrl(item.images[0].url) ?? item.images[0].url,
-          alt: item.images[0].altText || item.name,
+          image: {
+            url: imageUrl(image.url) ?? image.url,
+            alt: image.altText || item.name,
+          },
         }
-      : undefined,
+      : {}),
+    categories: item.categories.map((category) => ({
+      id: category.id,
+      name: category.name,
+    })),
     variants: item.variants
       .filter((variant) => variant.active)
       .map((variant) => ({
         id: variant.id,
-        label: variant.name,
+        label: variant.name || variant.sku,
         available: variant.availability?.inStock !== false,
         availability:
           variant.availability == null
@@ -163,6 +147,9 @@ export async function getProduct(productId: string): Promise<{
               ? "available"
               : "unavailable",
         price: formatMoney(variant.promotionalPrice ?? variant.listPrice),
+        ...(variant.promotionalPrice
+          ? { compareAtPrice: formatMoney(variant.listPrice) }
+          : {}),
       })),
   };
 }

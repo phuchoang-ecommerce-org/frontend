@@ -28,7 +28,8 @@ export async function signInWithCredentials(
   }
 
   try {
-    const guestCartId = (await cookies()).get("ecp_guest_cart")?.value;
+    const cookieStore = await cookies();
+    const guestCartId = cookieStore.get("ecp_guest_cart")?.value;
     const response = await requestSession(email.trim(), password, guestCartId);
     if (response.status === 429) {
       const seconds = Number(response.headers.get("retry-after"));
@@ -62,6 +63,14 @@ export async function signInWithCredentials(
       };
     }
     await createSession(session);
+    if (
+      guestCartId &&
+      /ecp_guest_cart=.*max-age=0/i.test(
+        response.headers.get("set-cookie") ?? "",
+      )
+    ) {
+      cookieStore.delete("ecp_guest_cart");
+    }
     return { ok: true };
   } catch {
     return {

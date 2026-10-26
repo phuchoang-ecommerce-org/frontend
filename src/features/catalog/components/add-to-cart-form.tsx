@@ -3,20 +3,16 @@
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, StatusMessage } from "@/components/ui";
-import type { Variant } from "../types";
+import type { ProductVariant } from "../types";
 import { VariantPicker } from "./catalog-controls";
 
-type PurchaseVariant = Variant & {
-  price: string;
-  availability: "available" | "unavailable" | "unknown";
-};
 type AddResult = { ok: true } | { ok: false; error: string };
 
 export function AddToCartForm({
   variants,
   onAdd,
 }: {
-  variants: PurchaseVariant[];
+  variants: ProductVariant[];
   onAdd: (variantId: string, quantity: number) => Promise<AddResult>;
 }) {
   const router = useRouter();
@@ -86,8 +82,13 @@ export function AddToCartForm({
         }}
       />
       {selected && (
-        <p className="text-sm">
+        <p className="flex flex-wrap items-baseline gap-2 text-sm">
           <strong className="text-lg tabular-nums">{selected.price}</strong>
+          {selected.compareAtPrice && (
+            <del className="text-muted-foreground tabular-nums">
+              {selected.compareAtPrice}
+            </del>
+          )}
           <span className="ms-2 text-muted-foreground">
             {selected.availability === "unknown"
               ? "Availability unknown"

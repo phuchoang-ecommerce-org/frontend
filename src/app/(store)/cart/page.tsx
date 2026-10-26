@@ -10,11 +10,15 @@ import { getSession } from "@/lib/session";
 export const metadata: Metadata = { title: "Cart | ECP" };
 
 export default async function CartPage() {
-  const cart = await getCurrentCart();
-  const session = await getSession();
+  const [cart, session] = await Promise.all([getCurrentCart(), getSession()]);
   const { lines, totals, expired } = cartDisplay(cart);
   return (
     <PageShell title="Your cart" actions={<Link href="/products" className="text-sm font-medium underline underline-offset-4">Continue browsing</Link>}>
+      {session?.cartMergeNotices?.map((notice) => (
+        <div className="mb-3" key={notice}>
+          <StatusMessage kind="info" message={notice} />
+        </div>
+      ))}
       {expired && <div className="mb-5"><StatusMessage kind="info" message="Your previous cart expired. Start a new cart by adding a product." /></div>}
       {!lines.length ? (
         <EmptyState title="Your cart is empty" message="Browse products to find something to add." actionLabel="View products" actionHref="/products" />
