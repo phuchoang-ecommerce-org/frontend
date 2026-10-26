@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { Button, StatusMessage, TextField } from "@/components/ui";
 import type { AddressDraft, FormResult, ProfileDraft } from "../types";
 
@@ -17,33 +18,69 @@ function ManagedForm<T extends Record<string, string>>({
   fields,
   submitLabel,
   onSubmit,
+  successHref,
+  errorTitle,
+  showValidationNotice = false,
 }: {
   initial: T;
   fields: FieldSpec[];
   submitLabel: string;
   onSubmit: (values: T) => Promise<FormResult>;
+  successHref?: string;
+  errorTitle?: string;
+  showValidationNotice?: boolean;
 }) {
+  const router = useRouter();
   const [values, setValues] = useState<T>(initial);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<FormResult | null>(null);
+  const [feedbackVersion, setFeedbackVersion] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
-  function focusFeedback() {
-    window.requestAnimationFrame(() => {
-      const target =
-        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
-        formRef.current?.querySelector<HTMLElement>("[data-form-feedback]");
-      target?.focus();
-    });
-  }
+  useEffect(() => {
+    if (feedbackVersion === 0) return;
+    const target =
+      formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
+      formRef.current?.querySelector<HTMLElement>("[data-form-feedback]");
+    target?.focus();
+  }, [feedbackVersion]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (pending) return;
+    if (showValidationNotice) {
+      const invalidFields = Array.from(
+        formRef.current?.querySelectorAll<HTMLInputElement>("input:invalid") ?? [],
+      );
+      if (invalidFields.length > 0) {
+        const errors = Object.fromEntries(
+          invalidFields.map((field) => [
+            field.name,
+            field.validity.valueMissing
+              ? `Enter your ${field.name}.`
+              : field.name === "email"
+                ? "Enter a valid email address."
+                : `Check your ${field.name}.`,
+          ]),
+        );
+        setResult({
+          ok: false,
+          message: "Check your email and password, then try again.",
+          errors,
+        });
+        setFeedbackVersion((version) => version + 1);
+        return;
+      }
+    }
     setPending(true);
     setResult(null);
     try {
       const next = await onSubmit(values);
+      if (next.ok && successHref) {
+        router.replace(successHref);
+        router.refresh();
+        return;
+      }
       setResult(next);
-      focusFeedback();
+      setFeedbackVersion((version) => version + 1);
       if (next.ok) {
         const passwordFields = fields.filter(
           (field) => field.type === "password",
@@ -61,7 +98,7 @@ function ManagedForm<T extends Record<string, string>>({
         ok: false,
         message: "The request could not be completed. Try again.",
       });
-      focusFeedback();
+      setFeedbackVersion((version) => version + 1);
     } finally {
       setPending(false);
     }
@@ -72,16 +109,24 @@ function ManagedForm<T extends Record<string, string>>({
       onSubmit={submit}
       className="space-y-4"
       aria-busy={pending}
+      noValidate={showValidationNotice}
     >
       {result && (
         <div
           data-form-feedback
-          role={result.ok ? "status" : "alert"}
           tabIndex={-1}
+          className={
+            errorTitle && !result.ok
+              ? "fixed inset-x-4 top-4 z-50 mx-auto max-w-md rounded-lg shadow-xl"
+              : undefined
+          }
         >
           <StatusMessage
             kind={result.ok ? "success" : "error"}
             message={result.message ?? "Saved."}
+            title={!result.ok ? errorTitle : undefined}
+            className={errorTitle && !result.ok ? "border-red-300 bg-red-50 px-4 py-3 text-red-900 [&_[data-slot=alert-description]]:text-red-900" : undefined}
+            onDismiss={errorTitle && !result.ok ? () => setResult(null) : undefined}
           />
         </div>
       )}
@@ -115,11 +160,13 @@ function ManagedForm<T extends Record<string, string>>({
 
 export function LoginForm({
   onSubmit,
+  successHref,
 }: {
   onSubmit: (values: {
     email: string;
     password: string;
   }) => Promise<FormResult>;
+  successHref?: string;
 }) {
   return (
     <ManagedForm
@@ -142,6 +189,9 @@ export function LoginForm({
       ]}
       submitLabel="Sign in"
       onSubmit={onSubmit}
+      successHref={successHref}
+      errorTitle="Sign-in failed"
+      showValidationNotice
     />
   );
 }

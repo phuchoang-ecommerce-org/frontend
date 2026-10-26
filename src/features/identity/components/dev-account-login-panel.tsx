@@ -20,12 +20,12 @@ export function DevAccountLoginPanel({
             className="flex flex-wrap items-center justify-between gap-3 py-3"
           >
             <div>
-              <p className="font-medium">{account.email}</p>
+              <p className="break-all font-medium">{account.email}</p>
               <p className="text-sm text-muted-foreground">{account.role}</p>
             </div>
             <DevAccountLoginButton
               accountKey={account.key}
-              label={`Sign in as ${account.email}`}
+              label={`Sign in as ${account.key}`}
               returnTo={returnTo}
               onSelect={onSelect}
             />

@@ -10,7 +10,6 @@ import {
 } from "./catalog/components";
 import {
   AddressForm,
-  DevAccountLoginPanel,
   LoginForm,
   PasswordForm,
   ProfileForm,
@@ -49,13 +48,6 @@ export const Identity: Story = {
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Sign in</h2>
         <LoginForm onSubmit={saved} />
-        <DevAccountLoginPanel
-          accounts={[
-            { key: "customer", email: "customer@demo.local", role: "Customer" },
-            { key: "staff", email: "staff@demo.local", role: "Staff" },
-          ]}
-          onSelect={saved}
-        />
       </section>
       <section className="space-y-6">
         <h2 className="text-xl font-semibold">Account forms</h2>

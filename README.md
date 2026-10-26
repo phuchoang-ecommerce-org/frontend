@@ -21,7 +21,7 @@ ECP_DEMO_LOGIN_ENABLED=true
 ECP_DEMO_PASSWORD=<backend seed password>
 ```
 
-The dev-account sign-in design also requires the backend URL to be on the local/dev allowlist. The frontend currently contains the dev-account UI components but has not yet connected them to a login route or server action. Selecting `dev` prepares the server-side profile for that integration; it does not by itself expose or sign in those accounts. In `prod`, the script forces `ECP_DEMO_LOGIN_ENABLED=false`.
+The dev-account sign-in panel appears on `/login` only when the frontend profile is `dev`, demo login is enabled, and the backend URL is on the local/dev allowlist. Its server action checks the same gate. In `prod`, the script forces `ECP_DEMO_LOGIN_ENABLED=false`; the panel is omitted from the login page and from the Vite-built Storybook preview. Stop an existing dev server before switching profiles so `localhost:3000` serves the selected profile.
 
 See the [frontend dev-account design](../docs/SolutionArchitecture/03-frontend/Component-Design/dev-account-login.md) and [integration plan](../docs/ProductManager/integration-plan.md) for the intended login and API configuration.
 
