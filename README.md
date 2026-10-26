@@ -5,9 +5,11 @@
 ```bash
 npm run dev 
 npm run build
+npm run build-webpack
 npm run start
 npm run lint 
 ```
+
 Choose the dev or prod profile.
 
 For a local seeded backend, run it with its `dev` Spring profile and set these private values in `.env.local` at the project root:
