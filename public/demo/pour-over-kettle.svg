@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-labelledby="title">
+  <title id="title">Black pour-over kettle</title>
+  <rect width="640" height="640" fill="#f3f0e9"/>
+  <path d="M190 260h240l-25 238H215z" fill="#183c32"/>
+  <path d="M218 260c0-74 204-74 204 0" fill="none" stroke="#183c32" stroke-width="28"/>
+  <path d="M415 295c72-8 104 31 100 81-4 52-42 82-93 76" fill="none" stroke="#183c32" stroke-width="25"/>
+  <path d="M205 300 91 363c-21 12-13 42 12 42h99" fill="none" stroke="#183c32" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="310" cy="375" r="52" fill="#d9a441"/>
+</svg>

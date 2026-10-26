@@ -1,22 +1,10 @@
 "use server";
 
-import { headers, cookies } from "next/headers";
+import { cookies } from "next/headers";
 import { requestSession, type BackendSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
+import { checkActionOrigin } from "@/lib/session/csrf";
 import type { FormResult } from "../types";
-
-export async function checkActionOrigin(): Promise<boolean> {
-  const requestHeaders = await headers();
-  const origin = requestHeaders.get("origin");
-  const host =
-    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
-  if (!origin || !host) return false;
-  try {
-    return new URL(origin).host === host;
-  } catch {
-    return false;
-  }
-}
 
 export async function signInWithCredentials(
   email: string,

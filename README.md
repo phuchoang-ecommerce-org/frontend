@@ -2,16 +2,13 @@
 
 ## Frontend profile
 
-Every project npm script accepts `--profile=dev` or `--profile=prod` after `--`:
-
 ```bash
-npm run dev -- --profile=dev
-npm run build -- --profile=dev
-npm run start -- --profile=dev
-npm run lint -- --profile=prod
+npm run dev 
+npm run build
+npm run start
+npm run lint 
 ```
-
-The scripts also accept `ECP_FRONTEND_PROFILE=dev` or `prod`. Without either setting, an interactive terminal asks which profile to use; noninteractive runs default to `prod`. An explicit `--profile` takes priority over the environment variable. The selected profile is printed before the command starts. `NODE_ENV` remains controlled by Next.js: a `dev` frontend profile can be used with `next start` after building the app.
+Choose the dev or prod profile.
 
 For a local seeded backend, run it with its `dev` Spring profile and set these private values in `.env.local` at the project root:
 

@@ -48,7 +48,8 @@ function ManagedForm<T extends Record<string, string>>({
     if (pending) return;
     if (showValidationNotice) {
       const invalidFields = Array.from(
-        formRef.current?.querySelectorAll<HTMLInputElement>("input:invalid") ?? [],
+        formRef.current?.querySelectorAll<HTMLInputElement>("input:invalid") ??
+          [],
       );
       if (invalidFields.length > 0) {
         const errors = Object.fromEntries(
@@ -125,8 +126,14 @@ function ManagedForm<T extends Record<string, string>>({
             kind={result.ok ? "success" : "error"}
             message={result.message ?? "Saved."}
             title={!result.ok ? errorTitle : undefined}
-            className={errorTitle && !result.ok ? "border-red-300 bg-red-50 px-4 py-3 text-red-900 [&_[data-slot=alert-description]]:text-red-900" : undefined}
-            onDismiss={errorTitle && !result.ok ? () => setResult(null) : undefined}
+            className={
+              errorTitle && !result.ok
+                ? "border-red-300 bg-red-50 px-4 py-3 text-red-900 [&_[data-slot=alert-description]]:text-red-900"
+                : undefined
+            }
+            onDismiss={
+              errorTitle && !result.ok ? () => setResult(null) : undefined
+            }
           />
         </div>
       )}
@@ -278,6 +285,82 @@ export function PasswordForm({
       }
       submitLabel={mode === "reset" ? "Send reset link" : "Change password"}
       onSubmit={onSubmit}
+    />
+  );
+}
+
+export function ForgotPasswordForm({
+  onSubmit,
+}: {
+  onSubmit: (values: { email: string }) => Promise<FormResult>;
+}) {
+  return (
+    <ManagedForm
+      initial={{ email: "" }}
+      fields={[
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          autoComplete: "email",
+          required: true,
+        },
+      ]}
+      submitLabel="Send reset link"
+      onSubmit={onSubmit}
+      showValidationNotice
+    />
+  );
+}
+
+export function ResetPasswordForm({
+  token,
+  onSubmit,
+}: {
+  token: string;
+  onSubmit: (values: {
+    token: string;
+    newPassword: string;
+  }) => Promise<FormResult>;
+}) {
+  return (
+    <ManagedForm
+      initial={{ token, newPassword: "" }}
+      fields={[
+        {
+          name: "newPassword",
+          label: "New password",
+          type: "password",
+          autoComplete: "new-password",
+          required: true,
+        },
+      ]}
+      submitLabel="Set new password"
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+export function ResendVerificationForm({
+  onSubmit,
+}: {
+  onSubmit: (values: { email: string }) => Promise<FormResult>;
+}) {
+  return (
+    <ManagedForm
+      initial={{ email: "" }}
+      fields={[
+        {
+          name: "email",
+          label: "Email",
+          type: "email",
+          autoComplete: "email",
+          required: true,
+        },
+      ]}
+      submitLabel="Resend verification link"
+      onSubmit={onSubmit}
+      showValidationNotice
     />
   );
 }

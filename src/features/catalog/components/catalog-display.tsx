@@ -96,10 +96,8 @@ export function ProductGrid({ products }: { products: Product[] }) {
   if (!products.length)
     return (
       <EmptyState
-        title="No products found"
-        message="Try another category or search term."
-        actionLabel="Browse products"
-        actionHref="/products"
+        title="No products available"
+        message="There are no products to show right now."
       />
     );
   return (

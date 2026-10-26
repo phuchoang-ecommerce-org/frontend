@@ -10,7 +10,7 @@ export async function devLoginAction(
 ): Promise<FormResult> {
   if (!devLoginEnabled())
     return { ok: false, message: "Dev sign-in is unavailable." };
-  if (returnTo && returnTo !== "/welcome")
+  if (returnTo && returnTo !== "/welcome" && returnTo !== "/cart")
     return { ok: false, message: "The requested page is unavailable." };
   const account = devAccounts.find((item) => item.key === accountKey);
   if (!account)
