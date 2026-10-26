@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Table } from "./table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
 
-const rows = <><thead><tr><th scope="col" className="text-start font-medium">Order</th><th scope="col" className="text-start font-medium">Status</th><th scope="col" className="text-end font-medium">Total</th></tr></thead><tbody><tr><td>#EC-1042</td><td>Preparing</td><td className="text-end">$128.00</td></tr><tr><td>#EC-1041</td><td>Delivered</td><td className="text-end">$72.00</td></tr></tbody></>;
+const rows = <><TableHeader><TableRow><TableHead scope="col">Order</TableHead><TableHead scope="col">Status</TableHead><TableHead scope="col">Total</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>#EC-1042</TableCell><TableCell>Preparing</TableCell><TableCell>$128.00</TableCell></TableRow><TableRow><TableCell>#EC-1041</TableCell><TableCell>Delivered</TableCell><TableCell>$72.00</TableCell></TableRow></TableBody></>;
 const meta = { title: "Shared UI/Table", component: Table, args: { caption: "Recent orders", children: rows } } satisfies Meta<typeof Table>;
 export default meta;
 type Story = StoryObj<typeof meta>;

@@ -1,8 +1,8 @@
 "use client";
 
 import { useId } from "react";
-import { Label } from "radix-ui";
-import { fieldBase } from "./styles";
+import { Input } from "./primitives/input";
+import { Field, FieldDescription, FieldError, FieldLabel } from "./primitives/field";
 
 export type TextFieldProps = {
   name: string;
@@ -37,16 +37,16 @@ export function TextField({
   const description =
     [hint && hintId, error && errorId].filter(Boolean).join(" ") || undefined;
   return (
-    <div className="grid gap-1 font-ui">
-      <Label.Root htmlFor={id} className="text-sm font-medium text-ink">
+    <Field data-invalid={Boolean(error)}>
+      <FieldLabel htmlFor={id}>
         {label}
         {required && (
-          <span className="ms-1 text-primary" aria-hidden="true">
+          <span aria-hidden="true">
             *
           </span>
         )}
-      </Label.Root>
-      <input
+      </FieldLabel>
+      <Input
         id={id}
         name={name}
         type={type}
@@ -59,18 +59,17 @@ export function TextField({
         aria-required={required || undefined}
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={description}
-        className={fieldBase}
       />
       {hint && (
-        <p id={hintId} className="text-sm text-muted">
+        <FieldDescription id={hintId}>
           {hint}
-        </p>
+        </FieldDescription>
       )}
       {error && (
-        <p id={errorId} className="text-sm font-medium text-primary">
+        <FieldError id={errorId}>
           {error}
-        </p>
+        </FieldError>
       )}
-    </div>
+    </Field>
   );
 }

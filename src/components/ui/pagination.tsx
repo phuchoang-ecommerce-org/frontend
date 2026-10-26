@@ -1,6 +1,11 @@
 "use client";
 
 import { Button } from "./button";
+import {
+  Pagination as PrimitivePagination,
+  PaginationContent,
+  PaginationItem,
+} from "./primitives/pagination";
 
 export type PaginationProps = {
   hasNext: boolean;
@@ -18,19 +23,22 @@ export function Pagination({
   onPrevious,
 }: PaginationProps) {
   return (
-    <nav
-      aria-label="Pagination"
-      className="flex flex-wrap items-center justify-between gap-2 font-ui"
-    >
-      <Button variant="secondary" disabled={!hasPrevious} onClick={onPrevious}>
-        Previous
-      </Button>
-      <span aria-live="polite" className="text-sm font-medium text-ink">
-        {pageLabel}
-      </span>
-      <Button variant="secondary" disabled={!hasNext} onClick={onNext}>
-        Next
-      </Button>
-    </nav>
+    <PrimitivePagination aria-label="Pagination">
+      <PaginationContent>
+        <PaginationItem>
+          <Button variant="secondary" disabled={!hasPrevious} onClick={onPrevious}>
+            Previous
+          </Button>
+        </PaginationItem>
+        <PaginationItem>
+          <span aria-live="polite">{pageLabel}</span>
+        </PaginationItem>
+        <PaginationItem>
+          <Button variant="secondary" disabled={!hasNext} onClick={onNext}>
+            Next
+          </Button>
+        </PaginationItem>
+      </PaginationContent>
+    </PrimitivePagination>
   );
 }

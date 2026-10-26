@@ -1,22 +1,25 @@
 import type { ReactNode } from "react";
+import {
+  Card as PrimitiveCard,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "./primitives/card";
 
 export type CardProps = {
   children: ReactNode;
   title?: string;
-  className?: string;
 };
 
-export function Card({ children, title, className = "" }: CardProps) {
+export function Card({ children, title }: CardProps) {
   return (
-    <section
-      className={`rounded-card border border-border bg-surface p-3 font-ui text-ink sm:p-4 ${className}`}
-    >
+    <PrimitiveCard>
       {title && (
-        <h2 className="mb-2 text-xl font-semibold leading-tight text-primary">
-          {title}
-        </h2>
+        <CardHeader>
+          <CardTitle><h2>{title}</h2></CardTitle>
+        </CardHeader>
       )}
-      {children}
-    </section>
+      <CardContent>{children}</CardContent>
+    </PrimitiveCard>
   );
 }

@@ -1,21 +1,8 @@
 @theme {
-  --spacing: initial;
-  --spacing-1: 8px;
-  --spacing-2: 16px;
-  --spacing-3: 24px;
-  --spacing-4: 32px;
-  --spacing-6: 48px;
-  --spacing-8: 64px;
-  --spacing-12: 96px;
-  --color-background: #f8f8f6;
-  --color-surface: #ffffff;
-  --color-primary: #1e3a5f;
-  --color-accent: #6b8e7a;
-  --color-border: #e5e5e5;
-  --color-ink: #263238;
-  --color-muted: #52606a;
-  --color-control-border: #78838b;
-  --color-soft: #f0f1ef;
+  --color-surface: var(--card);
+  --color-ink: var(--foreground);
+  --color-control-border: var(--input);
+  --color-soft: var(--muted);
   --font-ui: Inter, Arial, sans-serif;
   --radius-control: 10px;
   --radius-card: 12px;

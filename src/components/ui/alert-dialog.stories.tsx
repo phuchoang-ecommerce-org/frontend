@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, screen, userEvent } from "storybook/test";
+import { expect, screen, userEvent, waitFor } from "storybook/test";
 import { AlertDialog } from "./alert-dialog";
 import { Button } from "./button";
 
@@ -44,7 +44,7 @@ export const Confirmation: Story = {
       await screen.findByRole("alertdialog", { name: "Remove address?" }),
     ).toBeVisible();
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    await expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
-    await expect(trigger).toHaveFocus();
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    await waitFor(() => expect(trigger).toHaveFocus());
   },
 };

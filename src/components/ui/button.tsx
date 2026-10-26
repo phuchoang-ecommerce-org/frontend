@@ -2,11 +2,11 @@
 
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { LoaderCircle } from "lucide-react";
-import { focusRing } from "./styles";
+import { Button as PrimitiveButton } from "./primitives/button";
 
 export type ButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
-  "onClick"
+  "onClick" | "className"
 > & {
   variant?: "primary" | "secondary" | "quiet";
   loading?: boolean;
@@ -14,34 +14,32 @@ export type ButtonProps = Omit<
   onClick?: () => void;
 };
 
-const variants = {
-  primary: "border-primary bg-primary text-surface hover:bg-primary/90",
-  secondary:
-    "border-control-border bg-surface text-primary hover:border-primary hover:bg-soft",
-  quiet: "border-transparent bg-transparent text-primary hover:bg-soft",
-};
-
 export function Button({
   variant = "primary",
   loading = false,
   disabled,
   children,
-  className = "",
   type = "button",
   onClick,
   ...rest
 }: ButtonProps) {
   return (
-    <button
+    <PrimitiveButton
       {...rest}
       type={type}
       disabled={disabled || loading}
       onClick={onClick}
       aria-busy={loading || undefined}
-      className={`inline-flex min-h-control min-w-control items-center justify-center gap-1 rounded-control border px-2 font-ui text-sm font-medium leading-normal transition-colors duration-150 ease-out disabled:cursor-not-allowed disabled:opacity-60 ${focusRing} ${variants[variant]} ${className}`}
+      variant={
+        variant === "primary"
+          ? "default"
+          : variant === "secondary"
+            ? "outline"
+            : "ghost"
+      }
     >
-      {loading && <LoaderCircle aria-hidden="true" className="size-2" />}
+      {loading && <LoaderCircle aria-hidden="true" size={16} />}
       {children}
-    </button>
+    </PrimitiveButton>
   );
 }

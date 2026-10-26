@@ -2,7 +2,7 @@ import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect } from "storybook/test";
 import { AccountMenu, Breadcrumbs, PageShell, StaffNav, StoreHeader } from "./layout";
-import { AlertDialog, Badge, Button, Card, Dialog, EmptyState, ErrorState, LoadingSkeleton, Pagination, SelectField, StatusMessage, Table, TextField } from "./ui";
+import { AlertDialog, Badge, Button, Card, Dialog, EmptyState, ErrorState, LoadingSkeleton, Pagination, SelectField, StatusMessage, Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TextField } from "./ui";
 
 const meta = {
   title: "Shared Components/Overview",
@@ -26,11 +26,11 @@ function ComponentGallery() {
       <div className="space-y-8">
         <div className="grid gap-2">
           <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Components", href: "/components" }]} />
-          <p className="max-w-3xl text-base leading-relaxed text-muted">A calm foundation for storefront and staff tasks. Each control uses the same spacing, typography, and focus treatment.</p>
+          <p className="max-w-3xl text-base leading-relaxed text-muted-foreground">Default shadcn/ui components for storefront and staff tasks.</p>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-12">
-          <Card title="Actions" className="lg:col-span-7">
+          <div className="lg:col-span-7"><Card title="Actions">
             <div className="flex flex-wrap items-center gap-2">
               <Button>Place order</Button>
               <Button variant="secondary">Save for later</Button>
@@ -43,14 +43,14 @@ function ComponentGallery() {
               <Badge label="Delivered" kind="success" />
               <Badge label="Payment failed" kind="error" />
             </div>
-          </Card>
+          </Card></div>
 
-          <Card title="Feedback" className="lg:col-span-5">
+          <div className="lg:col-span-5"><Card title="Feedback">
             <div className="grid gap-2">
               {statusVisible && <StatusMessage kind="success" message="Address saved." onDismiss={() => setStatusVisible(false)} />}
               <StatusMessage kind="error" message="Payment could not be completed. Try another method." />
             </div>
-          </Card>
+          </Card></div>
         </div>
 
         <Card title="Form controls">
@@ -69,11 +69,11 @@ function ComponentGallery() {
         <Card title="Orders and loading">
           <div className="grid gap-4 lg:grid-cols-12">
             <div className="grid gap-3 lg:col-span-8">
-              <Table caption="Recent orders"><thead><tr><th scope="col" className="text-start font-medium">Order</th><th scope="col" className="text-start font-medium">Status</th><th scope="col" className="text-end font-medium">Total</th></tr></thead><tbody><tr><td>#EC-1042</td><td>Preparing</td><td className="text-end">$128.00</td></tr><tr><td>#EC-1041</td><td>Delivered</td><td className="text-end">$72.00</td></tr></tbody></Table>
+              <Table caption="Recent orders"><TableHeader><TableRow><TableHead scope="col">Order</TableHead><TableHead scope="col">Status</TableHead><TableHead scope="col">Total</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>#EC-1042</TableCell><TableCell>Preparing</TableCell><TableCell>$128.00</TableCell></TableRow><TableRow><TableCell>#EC-1041</TableCell><TableCell>Delivered</TableCell><TableCell>$72.00</TableCell></TableRow></TableBody></Table>
               <Pagination hasPrevious={page > 1} hasNext={page < 3} pageLabel={`Page ${page} of 3`} onPrevious={() => setPage((value) => value - 1)} onNext={() => setPage((value) => value + 1)} />
             </div>
             <div className="grid content-start gap-2 lg:col-span-4">
-              <p className="text-sm font-medium text-muted">Loading rows</p>
+              <p className="text-sm font-medium text-muted-foreground">Loading rows</p>
               <LoadingSkeleton shape="row" count={3} />
             </div>
           </div>
@@ -101,7 +101,7 @@ export const Gallery: Story = {
   play: async ({ canvas }) => {
     const button = canvas.getByRole("button", { name: "Place order" });
     await expect(button).toBeVisible();
-    await expect(getComputedStyle(button).backgroundColor).toBe("rgb(30, 58, 95)");
-    await expect(getComputedStyle(button).minHeight).toBe("44px");
+    await expect(button).toHaveAttribute("data-variant", "default");
+    await expect(button).toHaveAttribute("data-size", "default");
   },
 };

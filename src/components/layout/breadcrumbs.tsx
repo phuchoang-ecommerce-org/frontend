@@ -6,7 +6,7 @@ export type BreadcrumbsProps = { items: NavigationLink[] };
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav aria-label="Breadcrumb" className="font-ui text-sm text-muted">
+    <nav aria-label="Breadcrumb" className="font-ui text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1">
         {items.map((item, index) => (
           <li key={`${item.href}-${index}`} className="flex items-center gap-1">
