@@ -4,9 +4,10 @@ import { cookies } from "next/headers";
 import { backendRequest } from "@/lib/api/backend";
 import { formatMoney, type Money } from "@/lib/format/money";
 import { getSession } from "@/lib/session";
+import { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
 import type { CartLineData, CartTotals } from "../types";
 
-export const GUEST_CART_COOKIE = "ecp_guest_cart";
+export { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
 
 export type CartWire = {
   id: string;
