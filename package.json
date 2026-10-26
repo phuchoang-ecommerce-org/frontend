@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "build-webpack": "next build --webpack",
-    "start": "next start",
-    "lint": "eslint",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "dev": "node scripts/with-profile.mjs next dev",
+    "build": "node scripts/with-profile.mjs next build",
+    "build-webpack": "node scripts/with-profile.mjs next build --webpack",
+    "start": "node scripts/with-profile.mjs next start",
+    "lint": "node scripts/with-profile.mjs eslint",
+    "storybook": "node scripts/with-profile.mjs storybook dev -p 6006",
+    "build-storybook": "node scripts/with-profile.mjs storybook build"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

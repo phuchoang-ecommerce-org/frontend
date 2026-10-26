@@ -1,36 +1,28 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ECP frontend
 
-## Getting Started
+## Frontend profile
 
-First, run the development server:
+Every project npm script accepts `--profile=dev` or `--profile=prod` after `--`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev -- --profile=dev
+npm run build -- --profile=dev
+npm run start -- --profile=dev
+npm run lint -- --profile=prod
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The scripts also accept `ECP_FRONTEND_PROFILE=dev` or `prod`. Without either setting, an interactive terminal asks which profile to use; noninteractive runs default to `prod`. An explicit `--profile` takes priority over the environment variable. The selected profile is printed before the command starts. `NODE_ENV` remains controlled by Next.js: a `dev` frontend profile can be used with `next start` after building the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+For a local seeded backend, run it with its `dev` Spring profile and set these private values in `.env.local` at the project root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```dotenv
+ECP_API_BASE_URL=http://localhost:8080/api/v1
+ECP_DEMO_LOGIN_ENABLED=true
+ECP_DEMO_PASSWORD=<backend seed password>
+```
 
-## Learn More
+The dev-account sign-in design also requires the backend URL to be on the local/dev allowlist. The frontend currently contains the dev-account UI components but has not yet connected them to a login route or server action. Selecting `dev` prepares the server-side profile for that integration; it does not by itself expose or sign in those accounts. In `prod`, the script forces `ECP_DEMO_LOGIN_ENABLED=false`.
 
-To learn more about Next.js, take a look at the following resources:
+See the [frontend dev-account design](../docs/SolutionArchitecture/03-frontend/Component-Design/dev-account-login.md) and [integration plan](../docs/ProductManager/integration-plan.md) for the intended login and API configuration.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open [http://localhost:3000](http://localhost:3000) after starting the development server.
