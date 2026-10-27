@@ -12,6 +12,7 @@ export function ProductDetail({
   onAddToCart: (
     variantId: string,
     quantity: number,
+    csrfToken: string,
   ) => Promise<AddToCartResult>;
 }) {
   return (

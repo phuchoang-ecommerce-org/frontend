@@ -34,6 +34,10 @@ export default async function LoginPage({
         ? "/cart"
         : "/welcome";
   if (session) redirect(returnTo);
+  if (cookieStore.has("ecp_session")) {
+    const loginPath = `/login?returnTo=${encodeURIComponent(returnTo)}`;
+    redirect(`/api/session/expired?returnTo=${encodeURIComponent(loginPath)}`);
+  }
 
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-stone-950 sm:py-16 [&_button]:min-h-11 [&_input]:h-11">

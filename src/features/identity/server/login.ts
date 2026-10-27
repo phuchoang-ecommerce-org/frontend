@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { parseBackendSession, requestSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
-import { checkActionOrigin } from "@/lib/session/csrf";
+import { checkActionCsrf } from "@/lib/session/csrf";
 import {
   clearsGuestCartCookie,
   GUEST_CART_COOKIE,
@@ -13,8 +13,9 @@ import type { FormResult } from "../types";
 export async function signInWithCredentials(
   email: string,
   password: string,
+  csrfToken: string,
 ): Promise<FormResult> {
-  if (!(await checkActionOrigin())) {
+  if (!(await checkActionCsrf(csrfToken))) {
     return {
       ok: false,
       message: "Sign-in request could not be verified. Reload and try again.",
@@ -61,7 +62,10 @@ export async function signInWithCredentials(
 
     const session = parseBackendSession(await response.json());
     await createSession(session);
-    if (guestCartId && clearsGuestCartCookie(response.headers)) {
+    if (
+      guestCartId &&
+      (session.cartMerge?.merged || clearsGuestCartCookie(response.headers))
+    ) {
       cookieStore.delete(GUEST_CART_COOKIE);
     }
     return { ok: true };
@@ -76,6 +80,6 @@ export async function signInWithCredentials(
 export async function loginAction(values: {
   email: string;
   password: string;
-}): Promise<FormResult> {
-  return signInWithCredentials(values.email, values.password);
+}, csrfToken: string): Promise<FormResult> {
+  return signInWithCredentials(values.email, values.password, csrfToken);
 }

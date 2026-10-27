@@ -25,12 +25,11 @@ export function useCartLineEditor(
     }));
   async function commit() {
     const next = Number(draft);
-    if (!Number.isSafeInteger(next) || next < 1) {
+    if (!Number.isSafeInteger(next) || next < 0) {
       setEdit({
         quantity,
         draft: String(quantity),
-        error:
-          "Enter a whole number greater than zero. Use Remove to delete the item.",
+        error: "Enter a whole number of zero or more.",
       });
       return;
     }

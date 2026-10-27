@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { StatusMessage } from "@/components/ui";
+import { csrfToken } from "@/lib/session/client-csrf";
 import type { CartChangeResult, CartLineData } from "../types";
 import { CartLine } from "./cart";
 
@@ -12,14 +13,17 @@ export function GuestCartLine({
   onRemove,
 }: {
   line: CartLineData;
-  onQuantityChange: (quantity: number) => Promise<CartChangeResult>;
-  onRemove: () => Promise<CartChangeResult>;
+  onQuantityChange: (
+    quantity: number,
+    csrfToken: string,
+  ) => Promise<CartChangeResult>;
+  onRemove: (csrfToken: string) => Promise<CartChangeResult>;
 }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   async function update(quantity: number) {
-    const result = await onQuantityChange(quantity);
+    const result = await onQuantityChange(quantity, await csrfToken());
     if (result.ok) router.refresh();
     return result;
   }
@@ -28,7 +32,7 @@ export function GuestCartLine({
     setPending(true);
     setError("");
     try {
-      const result = await onRemove();
+      const result = await onRemove(await csrfToken());
       if (result.ok) router.refresh();
       else setError(result.error);
     } catch {

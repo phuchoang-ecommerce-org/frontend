@@ -18,9 +18,13 @@ For a local seeded backend, run it with its `dev` Spring profile and set these p
 ECP_API_BASE_URL=http://localhost:8080/api/v1
 ECP_DEMO_LOGIN_ENABLED=true
 ECP_DEMO_PASSWORD=<backend seed password>
+CSRF_SECRET=<at least 32 random characters>
+ECP_SESSION_REDIS_URL=redis://localhost:6380
 ```
 
 The dev-account sign-in panel appears on `/login` only when the frontend profile is `dev`, demo login is enabled, and the backend URL is on the local/dev allowlist. Its server action checks the same gate. In `prod`, the script forces `ECP_DEMO_LOGIN_ENABLED=false`; the panel is omitted from the login page and from the Vite-built Storybook preview. Stop an existing dev server before switching profiles so `localhost:3000` serves the selected profile.
+
+The `prod` frontend profile requires both `CSRF_SECRET` and `ECP_SESSION_REDIS_URL`. Redis stores the opaque server-side session data and coordinates token refresh across frontend replicas. The `dev` profile and tests may omit them to use process-local fallbacks, including when exercising a production build with `npm run start -- --profile=dev`. An unprofiled process with `NODE_ENV=production` also fails closed.
 
 See the [frontend dev-account design](../docs/SolutionArchitecture/03-frontend/Component-Design/dev-account-login.md) and [integration plan](../docs/ProductManager/integration-plan.md) for the intended login and API configuration.
 

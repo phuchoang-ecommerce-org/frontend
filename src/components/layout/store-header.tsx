@@ -42,7 +42,7 @@ export function StoreHeader({
         </nav>
         <div className="ms-auto flex items-center gap-2">
           <Link
-            href={accountLabel ? "/account" : "/login"}
+            href={accountLabel ? "/account/addresses" : "/login"}
             className={`inline-flex min-h-control items-center rounded-control text-sm font-medium text-primary hover:underline ${focusRing}`}
           >
             {accountLabel || "Sign in"}

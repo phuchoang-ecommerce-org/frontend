@@ -60,18 +60,21 @@ export async function requestSession(
   password: string,
   guestCartId?: string,
 ): Promise<Response> {
-  const body: Omit<CredentialsRequest, "guestCartId"> = { email, password };
+  const body: CredentialsRequest = {
+    email,
+    password,
+    ...(guestCartId ? { guestCartId } : {}),
+  };
 
   return backendRequest("/sessions", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(guestCartId
-        ? {
+    ...(guestCartId
+      ? {
+          headers: {
             Cookie: `${GUEST_CART_COOKIE}=${encodeURIComponent(guestCartId)}`,
-          }
-        : {}),
-    },
+          },
+        }
+      : {}),
     body: JSON.stringify(body),
     cache: "no-store",
   });
@@ -89,6 +92,14 @@ export async function endSession(refreshToken: string): Promise<void> {
   await backendRequest("/sessions/current", {
     method: "DELETE",
     body: JSON.stringify({ refreshToken }),
+    cache: "no-store",
+  });
+}
+
+export async function endAllSessions(accessToken: string): Promise<void> {
+  await backendRequest("/sessions", {
+    method: "DELETE",
+    headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
 }

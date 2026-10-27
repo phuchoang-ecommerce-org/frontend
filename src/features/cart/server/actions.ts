@@ -8,7 +8,7 @@ import {
   problemMessage,
   readProblem,
 } from "@/lib/api/backend";
-import { checkActionOrigin } from "@/lib/session/csrf";
+import { checkActionCsrf } from "@/lib/session/csrf";
 import { getSession } from "@/lib/session";
 import type { CartChangeResult } from "../types";
 import { cartHeaders, GUEST_CART_COOKIE, parseCartWire } from "./queries";
@@ -46,8 +46,9 @@ async function writeCart(
 export async function addToCartAction(
   variantId: string,
   quantity: number,
+  csrfToken: string,
 ): Promise<CartChangeResult> {
-  if (!(await checkActionOrigin()))
+  if (!(await checkActionCsrf(csrfToken)))
     return failed("Reload the page and try again.");
   if (!variantId || !Number.isSafeInteger(quantity) || quantity < 1)
     return failed("Choose a variant and a whole quantity greater than zero.");
@@ -88,19 +89,21 @@ export async function changeCartQuantityAction(
   cartId: string,
   lineId: string,
   quantity: number,
+  csrfToken: string,
 ): Promise<CartChangeResult> {
-  if (!(await checkActionOrigin()))
+  if (!(await checkActionCsrf(csrfToken)))
     return failed("Reload the page and try again.");
-  if (!Number.isSafeInteger(quantity) || quantity < 1)
-    return failed("Enter a whole number greater than zero.");
+  if (!Number.isSafeInteger(quantity) || quantity < 0)
+    return failed("Enter a whole number of zero or more.");
   return writeCart("PATCH", `/carts/${cartId}/lines/${lineId}`, { quantity });
 }
 
 export async function removeCartLineAction(
   cartId: string,
   lineId: string,
+  csrfToken: string,
 ): Promise<CartChangeResult> {
-  if (!(await checkActionOrigin()))
+  if (!(await checkActionCsrf(csrfToken)))
     return failed("Reload the page and try again.");
   return writeCart("DELETE", `/carts/${cartId}/lines/${lineId}`);
 }

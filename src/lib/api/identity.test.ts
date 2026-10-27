@@ -10,7 +10,7 @@ describe("requestSession", () => {
     vi.unstubAllGlobals();
   });
 
-  it("forwards the guest cart cookie while keeping it out of the credentials body", async () => {
+  it("sends the guest cart in both the contract body and current backend cookie", async () => {
     vi.stubEnv("ECP_API_BASE_URL", "http://backend.test/api/v1/");
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -36,12 +36,13 @@ describe("requestSession", () => {
         body: JSON.stringify({
           email: "customer@example.com",
           password: "correct horse battery staple",
+          guestCartId: "guest-cart-id",
         }),
       }),
     );
   });
 
-  it("does not send a guest cookie when the visitor has no cart", async () => {
+  it("omits the guest cart id when the visitor has no cart", async () => {
     vi.stubEnv("ECP_API_BASE_URL", "http://backend.test/api/v1");
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -52,6 +53,10 @@ describe("requestSession", () => {
 
     const init = fetchMock.mock.calls.at(0)?.at(1) as RequestInit | undefined;
     expect(init?.headers).toEqual({ "Content-Type": "application/json" });
+    expect(JSON.parse(String(init?.body))).toEqual({
+      email: "customer@example.com",
+      password: "password",
+    });
   });
 });
 
@@ -83,5 +88,24 @@ describe("parseBackendSession", () => {
         account: {},
       }),
     ).toThrow();
+  });
+
+  it("accepts current backend cart merge notices during contract migration", () => {
+    const value = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresIn: 900,
+      account: {
+        id: "customer-id",
+        email: "customer@example.com",
+        status: "ACTIVE",
+        verificationStatus: "VERIFIED",
+        roles: ["CUSTOMER"],
+        createdAt: "2026-10-27T00:00:00Z",
+      },
+      cartMergeNotices: ["An item quantity was reduced."],
+    };
+
+    expect(parseBackendSession(value)).toEqual(value);
   });
 });

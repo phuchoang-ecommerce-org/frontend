@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui";
 import { logoutAction } from "@/features/identity/server/logout";
+import { csrfToken } from "@/lib/session/client-csrf";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export function SignOutButton() {
     if (pending) return;
     setPending(true);
     try {
-      await logoutAction();
+      await logoutAction(await csrfToken());
       router.replace("/login");
       router.refresh();
     } finally {

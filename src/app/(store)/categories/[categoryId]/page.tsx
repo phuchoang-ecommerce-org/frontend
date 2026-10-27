@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Breadcrumbs, PageShell } from "@/components/layout";
-import { CategoryTree, ProductGrid } from "@/features/catalog/components";
+import {
+  CatalogPagination,
+  CategoryTree,
+  ProductGrid,
+} from "@/features/catalog/components";
+import {
+  readCursorPage,
+  type CursorSearchParams,
+} from "@/features/catalog/pagination";
 import {
   getCategories,
   getCategory,
@@ -16,14 +23,14 @@ export default async function CategoryPage({
   searchParams,
 }: {
   params: Promise<{ categoryId: string }>;
-  searchParams: Promise<{ cursor?: string | string[] }>;
+  searchParams: Promise<CursorSearchParams>;
 }) {
   const [{ categoryId }, query] = await Promise.all([params, searchParams]);
-  const cursor = typeof query.cursor === "string" ? query.cursor : undefined;
+  const page = readCursorPage(query);
   const [category, categories, result] = await Promise.all([
     getCategory(categoryId),
     getCategories(),
-    getCategoryProducts(categoryId, cursor),
+    getCategoryProducts(categoryId, page.cursor),
   ]);
   if (!category || !result) notFound();
   return (
@@ -50,14 +57,11 @@ export default async function CategoryPage({
           className="min-w-0 space-y-6"
         >
           <ProductGrid products={result.products} />
-          {result.nextCursor && (
-            <Link
-              href={`/categories/${encodeURIComponent(categoryId)}?cursor=${encodeURIComponent(result.nextCursor)}`}
-              className="inline-flex min-h-control items-center rounded-control border border-border px-4 text-sm font-medium hover:bg-soft focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              Next products
-            </Link>
-          )}
+          <CatalogPagination
+            basePath={`/categories/${encodeURIComponent(categoryId)}`}
+            page={page}
+            nextCursor={result.nextCursor}
+          />
         </section>
       </div>
     </PageShell>

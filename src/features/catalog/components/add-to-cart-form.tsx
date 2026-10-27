@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button, StatusMessage } from "@/components/ui";
+import { csrfToken } from "@/lib/session/client-csrf";
 import type { ProductVariant } from "../types";
 import { VariantPicker } from "./catalog-controls";
 
@@ -13,7 +14,11 @@ export function AddToCartForm({
   onAdd,
 }: {
   variants: ProductVariant[];
-  onAdd: (variantId: string, quantity: number) => Promise<AddResult>;
+  onAdd: (
+    variantId: string,
+    quantity: number,
+    csrfToken: string,
+  ) => Promise<AddResult>;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -47,7 +52,7 @@ export function AddToCartForm({
     setPending(true);
     setMessage(null);
     try {
-      const result = await onAdd(selected.id, count);
+      const result = await onAdd(selected.id, count, await csrfToken());
       setMessage(
         result.ok
           ? {

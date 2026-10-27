@@ -54,7 +54,7 @@ export function CartLine({
           Quantity
           <input
             type="number"
-            min={1}
+            min={0}
             step={1}
             value={editor.draft}
             disabled={busy || !line.available}
@@ -73,6 +73,7 @@ export function CartLine({
           Remove
         </Button>
       </div>
+      <p className="text-xs text-muted-foreground">Set quantity to 0 to remove this item.</p>
       {(error || editor.error) && (
         <StatusMessage kind="error" message={error || editor.error} />
       )}

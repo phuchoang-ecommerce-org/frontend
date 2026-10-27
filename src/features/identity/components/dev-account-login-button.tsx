@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button, StatusMessage } from "@/components/ui";
+import { csrfToken } from "@/lib/session/client-csrf";
 import type { FormResult } from "../types";
+import { devAccountDestination } from "./dev-account-destination";
 
 export function DevAccountLoginButton({
   accountKey,
@@ -16,7 +18,11 @@ export function DevAccountLoginButton({
   label: string;
   returnTo?: string | undefined;
   pending?: boolean | undefined;
-  onSelect: (accountKey: string, returnTo?: string) => Promise<FormResult>;
+  onSelect: (
+    accountKey: string,
+    returnTo: string | undefined,
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -26,9 +32,9 @@ export function DevAccountLoginButton({
     setBusy(true);
     setError("");
     try {
-      const result = await onSelect(accountKey, returnTo);
+      const result = await onSelect(accountKey, returnTo, await csrfToken());
       if (result.ok) {
-        router.replace("/welcome");
+        router.replace(devAccountDestination(accountKey));
         router.refresh();
       } else setError(result.message);
     } catch {

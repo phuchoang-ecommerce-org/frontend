@@ -7,7 +7,7 @@ const cookieMocks = vi.hoisted(() => ({
 const dependencyMocks = vi.hoisted(() => ({
   requestSession: vi.fn(),
   createSession: vi.fn(),
-  checkActionOrigin: vi.fn(),
+  checkActionCsrf: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -27,7 +27,7 @@ vi.mock("@/lib/session", () => ({
   createSession: dependencyMocks.createSession,
 }));
 vi.mock("@/lib/session/csrf", () => ({
-  checkActionOrigin: dependencyMocks.checkActionOrigin,
+  checkActionCsrf: dependencyMocks.checkActionCsrf,
 }));
 
 import { signInWithCredentials } from "./login";
@@ -47,10 +47,22 @@ const session = {
 };
 
 function successfulLogin(
-  options: { setCookie?: string; notices?: string[] } = {},
+  options: {
+    merged?: boolean;
+    notices?: string[];
+    setCookie?: string;
+  } = {},
 ): Response {
   return new Response(
-    JSON.stringify({ ...session, cartMergeNotices: options.notices ?? [] }),
+    JSON.stringify({
+      ...session,
+      ...(options.merged === undefined
+        ? {}
+        : { cartMerge: { merged: options.merged } }),
+      ...(options.notices === undefined
+        ? {}
+        : { cartMergeNotices: options.notices }),
+    }),
     {
       status: 201,
       ...(options.setCookie
@@ -64,10 +76,10 @@ describe("signInWithCredentials guest cart migration", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cookieMocks.guestCartId = undefined;
-    dependencyMocks.checkActionOrigin.mockResolvedValue(true);
+    dependencyMocks.checkActionCsrf.mockResolvedValue(true);
   });
 
-  it("forwards the guest cart and removes its browser cookie after a successful merge", async () => {
+  it("removes the browser cookie when the current backend confirms a successful merge", async () => {
     cookieMocks.guestCartId = "guest-cart-id";
     dependencyMocks.requestSession.mockResolvedValue(
       successfulLogin({
@@ -79,6 +91,7 @@ describe("signInWithCredentials guest cart migration", () => {
     const result = await signInWithCredentials(
       "customer@example.com",
       "password",
+      "csrf-token",
     );
 
     expect(result).toEqual({ ok: true });
@@ -93,7 +106,23 @@ describe("signInWithCredentials guest cart migration", () => {
     expect(cookieMocks.delete).toHaveBeenCalledWith("ecp_guest_cart");
   });
 
-  it("keeps login successful and preserves the guest cart when merging fails", async () => {
+  it("also removes the browser cookie for the contract merge outcome", async () => {
+    cookieMocks.guestCartId = "guest-cart-id";
+    dependencyMocks.requestSession.mockResolvedValue(
+      successfulLogin({ merged: true }),
+    );
+
+    const result = await signInWithCredentials(
+      "customer@example.com",
+      "password",
+      "csrf-token",
+    );
+
+    expect(result).toEqual({ ok: true });
+    expect(cookieMocks.delete).toHaveBeenCalledWith("ecp_guest_cart");
+  });
+
+  it("keeps login successful and preserves the guest cart when the current backend merge fails", async () => {
     const notice =
       "Your guest cart could not be recovered yet; retrying sign-in will recover your items.";
     cookieMocks.guestCartId = "guest-cart-id";
@@ -104,6 +133,7 @@ describe("signInWithCredentials guest cart migration", () => {
     const result = await signInWithCredentials(
       "customer@example.com",
       "password",
+      "csrf-token",
     );
 
     expect(result).toEqual({ ok: true });
@@ -119,6 +149,7 @@ describe("signInWithCredentials guest cart migration", () => {
     const result = await signInWithCredentials(
       "customer@example.com",
       "password",
+      "csrf-token",
     );
 
     expect(result).toEqual({ ok: true });

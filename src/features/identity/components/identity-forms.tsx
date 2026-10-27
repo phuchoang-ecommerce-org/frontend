@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Button, StatusMessage, TextField } from "@/components/ui";
-import type { AddressDraft, FormResult, ProfileDraft } from "../types";
+import { csrfToken } from "@/lib/session/client-csrf";
+import type { FormResult, ProfileDraft } from "../types";
 
 type FieldSpec = {
   name: string;
@@ -25,7 +26,7 @@ function ManagedForm<T extends Record<string, string>>({
   initial: T;
   fields: FieldSpec[];
   submitLabel: string;
-  onSubmit: (values: T) => Promise<FormResult>;
+  onSubmit: (values: T, csrfToken: string) => Promise<FormResult>;
   successHref?: string | undefined;
   errorTitle?: string | undefined;
   showValidationNotice?: boolean | undefined;
@@ -74,7 +75,7 @@ function ManagedForm<T extends Record<string, string>>({
     setPending(true);
     setResult(null);
     try {
-      const next = await onSubmit(values);
+      const next = await onSubmit(values, await csrfToken());
       if (next.ok && successHref) {
         router.replace(successHref);
         router.refresh();
@@ -172,7 +173,7 @@ export function LoginForm({
   onSubmit: (values: {
     email: string;
     password: string;
-  }) => Promise<FormResult>;
+  }, csrfToken: string) => Promise<FormResult>;
   successHref?: string | undefined;
 }) {
   return (
@@ -209,7 +210,7 @@ export function RegisterForm({
     name: string;
     email: string;
     password: string;
-  }) => Promise<FormResult>;
+  }, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -250,7 +251,7 @@ export function PasswordForm({
     email: string;
     password: string;
     newPassword: string;
-  }) => Promise<FormResult>;
+  }, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -292,7 +293,7 @@ export function PasswordForm({
 export function ForgotPasswordForm({
   onSubmit,
 }: {
-  onSubmit: (values: { email: string }) => Promise<FormResult>;
+  onSubmit: (values: { email: string }, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -321,7 +322,7 @@ export function ResetPasswordForm({
   onSubmit: (values: {
     token: string;
     newPassword: string;
-  }) => Promise<FormResult>;
+  }, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -344,7 +345,7 @@ export function ResetPasswordForm({
 export function ResendVerificationForm({
   onSubmit,
 }: {
-  onSubmit: (values: { email: string }) => Promise<FormResult>;
+  onSubmit: (values: { email: string }, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -369,7 +370,7 @@ export function ProfileForm({
   onSubmit,
 }: {
   profile: ProfileDraft;
-  onSubmit: (values: ProfileDraft) => Promise<FormResult>;
+  onSubmit: (values: ProfileDraft, csrfToken: string) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -391,71 +392,6 @@ export function ProfileForm({
         { name: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
       ]}
       submitLabel="Save profile"
-      onSubmit={onSubmit}
-    />
-  );
-}
-export function AddressForm({
-  address,
-  onSubmit,
-}: {
-  address?: AddressDraft;
-  onSubmit: (values: AddressDraft) => Promise<FormResult>;
-}) {
-  return (
-    <ManagedForm
-      initial={
-        address ?? {
-          name: "",
-          line1: "",
-          line2: "",
-          city: "",
-          region: "",
-          postalCode: "",
-          country: "",
-          phone: "",
-        }
-      }
-      fields={[
-        {
-          name: "name",
-          label: "Recipient name",
-          autoComplete: "name",
-          required: true,
-        },
-        {
-          name: "line1",
-          label: "Address line 1",
-          autoComplete: "address-line1",
-          required: true,
-        },
-        {
-          name: "line2",
-          label: "Address line 2",
-          autoComplete: "address-line2",
-        },
-        {
-          name: "city",
-          label: "City",
-          autoComplete: "address-level2",
-          required: true,
-        },
-        { name: "region", label: "Region", autoComplete: "address-level1" },
-        {
-          name: "postalCode",
-          label: "Postal code",
-          autoComplete: "postal-code",
-          required: true,
-        },
-        {
-          name: "country",
-          label: "Country",
-          autoComplete: "country-name",
-          required: true,
-        },
-        { name: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
-      ]}
-      submitLabel="Save address"
       onSubmit={onSubmit}
     />
   );

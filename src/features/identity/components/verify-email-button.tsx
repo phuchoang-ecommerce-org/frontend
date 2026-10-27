@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Button, StatusMessage } from "@/components/ui";
+import { csrfToken } from "@/lib/session/client-csrf";
 import type { FormResult } from "../types";
 
 export function VerifyEmailButton({
@@ -10,7 +11,7 @@ export function VerifyEmailButton({
   onVerify,
 }: {
   token: string;
-  onVerify: (token: string) => Promise<FormResult>;
+  onVerify: (token: string, csrfToken: string) => Promise<FormResult>;
 }) {
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<FormResult | null>(null);
@@ -18,7 +19,7 @@ export function VerifyEmailButton({
     if (pending) return;
     setPending(true);
     try {
-      setResult(await onVerify(token));
+      setResult(await onVerify(token, await csrfToken()));
     } catch {
       setResult({ ok: false, message: "Verification could not be completed. Try again." });
     } finally {

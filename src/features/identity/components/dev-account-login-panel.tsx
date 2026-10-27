@@ -9,7 +9,11 @@ export function DevAccountLoginPanel({
 }: {
   accounts: DevAccount[];
   returnTo?: string | undefined;
-  onSelect: (accountKey: string, returnTo?: string) => Promise<FormResult>;
+  onSelect: (
+    accountKey: string,
+    returnTo: string | undefined,
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <Card title="Dev accounts">

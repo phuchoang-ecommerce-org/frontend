@@ -9,7 +9,7 @@ import {
   VariantPicker,
 } from "./catalog/components";
 import {
-  AddressForm,
+  AddressBook,
   LoginForm,
   PasswordForm,
   ProfileForm,
@@ -57,7 +57,11 @@ export const Identity: Story = {
           profile={{ name: "Mai Nguyen", email: "mai@example.com", phone: "" }}
           onSubmit={saved}
         />
-        <AddressForm onSubmit={saved} />
+        <AddressBook
+          addresses={[]}
+          onSave={saved}
+          onRemove={saved}
+        />
       </section>
     </div>
   ),

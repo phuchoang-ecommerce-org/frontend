@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
+import { cn } from "cn";
 import {
   Dialog as PrimitiveDialog,
   DialogContent,
@@ -16,14 +17,15 @@ export type DialogProps = {
   children: ReactNode;
   trigger?: ReactNode;
   description?: string;
+  contentClassName?: string;
   onOpenChange: (open: boolean) => void;
 };
 
-export function Dialog({ open, title, children, trigger, description, onOpenChange }: DialogProps) {
+export function Dialog({ open, title, children, trigger, description, contentClassName, onOpenChange }: DialogProps) {
   const returnFocus = useRef<HTMLElement | null>(null);
   return <PrimitiveDialog open={open} onOpenChange={onOpenChange}>
     {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-    <DialogContent onOpenAutoFocus={() => { if (!trigger) returnFocus.current = document.activeElement as HTMLElement; }} onCloseAutoFocus={(event) => { if (!trigger && returnFocus.current?.isConnected) { event.preventDefault(); returnFocus.current.focus(); } }}>
+    <DialogContent className={cn(contentClassName)} onOpenAutoFocus={() => { if (!trigger) returnFocus.current = document.activeElement as HTMLElement; }} onCloseAutoFocus={(event) => { if (!trigger && returnFocus.current?.isConnected) { event.preventDefault(); returnFocus.current.focus(); } }}>
       <DialogHeader>
         <DialogTitle>{title}</DialogTitle>
         <DialogDescription hidden={!description}>{description || title}</DialogDescription>
