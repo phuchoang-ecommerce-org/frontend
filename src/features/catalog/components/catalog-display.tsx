@@ -9,7 +9,7 @@ export function PriceDisplay({
   compareAtPrice,
 }: {
   price: string;
-  compareAtPrice?: string;
+  compareAtPrice?: string | undefined;
 }) {
   return (
     <p className="flex flex-wrap items-baseline gap-2 tabular-nums">
@@ -31,7 +31,7 @@ export function AvailabilityLabel({
   text,
 }: {
   availability: Product["availability"];
-  text?: string;
+  text?: string | undefined;
 }) {
   const label =
     text ??

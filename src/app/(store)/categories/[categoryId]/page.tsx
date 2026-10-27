@@ -53,7 +53,7 @@ export default async function CategoryPage({
           {result.nextCursor && (
             <Link
               href={`/categories/${encodeURIComponent(categoryId)}?cursor=${encodeURIComponent(result.nextCursor)}`}
-              className="inline-flex min-h-control items-center rounded-control border border-border px-4 text-sm font-medium hover:bg-soft"
+              className="inline-flex min-h-control items-center rounded-control border border-border px-4 text-sm font-medium hover:bg-soft focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               Next products
             </Link>

@@ -6,7 +6,7 @@ import { focusRing } from "../ui/styles";
 export type StoreHeaderProps = {
   cartCount: number;
   navLinks: NavigationLink[];
-  accountLabel?: string;
+  accountLabel?: string | undefined;
 };
 
 export function StoreHeader({

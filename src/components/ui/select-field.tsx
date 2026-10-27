@@ -8,11 +8,11 @@ export type SelectFieldProps = {
   name: string;
   label: string;
   value: string;
-  options: { value: string; label: string; disabled?: boolean }[];
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  disabled?: boolean;
+  options: { value: string; label: string; disabled?: boolean | undefined }[];
+  required?: boolean | undefined;
+  hint?: string | undefined;
+  error?: string | undefined;
+  disabled?: boolean | undefined;
   onChange: (value: string) => void;
 };
 

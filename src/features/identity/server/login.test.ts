@@ -21,6 +21,7 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("@/lib/api/identity", () => ({
   requestSession: dependencyMocks.requestSession,
+  parseBackendSession: (value: unknown) => value,
 }));
 vi.mock("@/lib/session", () => ({
   createSession: dependencyMocks.createSession,
@@ -38,7 +39,10 @@ const session = {
   account: {
     id: "customer-id",
     email: "customer@example.com",
+    status: "ACTIVE",
+    verificationStatus: "VERIFIED",
     roles: ["CUSTOMER"],
+    createdAt: "2026-10-27T00:00:00Z",
   },
 };
 
@@ -49,9 +53,9 @@ function successfulLogin(
     JSON.stringify({ ...session, cartMergeNotices: options.notices ?? [] }),
     {
       status: 201,
-      headers: options.setCookie
-        ? { "Set-Cookie": options.setCookie }
-        : undefined,
+      ...(options.setCookie
+        ? { headers: { "Set-Cookie": options.setCookie } }
+        : {}),
     },
   );
 }

@@ -45,6 +45,7 @@ function sameMoney(left?: ApiMoney | null, right?: ApiMoney | null): boolean {
 
 function productView(item: ApiProductSummary): Product {
   const priceFrom = formatMoney(item.priceFrom ?? null);
+  const productImageUrl = imageUrl(item.primaryImageUrl);
   const price =
     item.priceTo && !sameMoney(item.priceFrom, item.priceTo)
       ? `${priceFrom} – ${formatMoney(item.priceTo)}`
@@ -53,7 +54,7 @@ function productView(item: ApiProductSummary): Product {
     id: item.id,
     name: item.name,
     href: `/products/${encodeURIComponent(item.id)}`,
-    imageUrl: imageUrl(item.primaryImageUrl),
+    ...(productImageUrl ? { imageUrl: productImageUrl } : {}),
     price,
     availability:
       item.inStock == null
@@ -68,11 +69,11 @@ export async function getCategories(): Promise<Category[]> {
   return (await fetchCategories()).map(categoryView);
 }
 
-export async function getProducts(): Promise<{
+export async function getProducts(cursor?: string): Promise<{
   products: Product[];
   nextCursor?: string;
 }> {
-  const page = await fetchProducts();
+  const page = await fetchProducts(cursor);
   return {
     products: page.items.map(productView),
     ...(page.page.next ? { nextCursor: page.page.next } : {}),

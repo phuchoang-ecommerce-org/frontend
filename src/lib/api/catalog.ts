@@ -2,6 +2,7 @@ import "server-only";
 
 import { z } from "zod";
 import { backendRequest } from "./backend";
+import type { components } from "./types";
 
 const CATALOG_REVALIDATE_SECONDS = 300;
 
@@ -27,10 +28,14 @@ const categoryBaseSchema = z.object({
   ancestors: z.array(categoryRefSchema).nullish(),
 });
 type CategoryNodeInput = z.infer<typeof categoryBaseSchema> & {
-  children?: CategoryNodeInput[] | null;
+  children?: CategoryNodeInput[] | null | undefined;
 };
 const categoryNodeSchema: z.ZodType<CategoryNodeInput> = categoryBaseSchema.extend({
-  children: z.lazy(() => z.array(categoryNodeSchema)).nullish(),
+  // Prism terminates the recursive sample with `null`; discard that sentinel.
+  children: z
+    .lazy(() => z.array(categoryNodeSchema.nullable()))
+    .transform((children) => children.filter((child) => child !== null))
+    .nullish(),
 });
 const productSummarySchema = z.object({
   id: idSchema,
@@ -99,6 +104,20 @@ export type ApiProductSummary = z.infer<typeof productSummarySchema>;
 export type ApiProduct = z.infer<typeof productSchema>;
 export type ApiProductPage = z.infer<typeof productPageSchema>;
 
+type ContractCategory = components["schemas"]["CategoryNode"];
+type ContractProduct = components["schemas"]["Product"];
+type ContractProductPage = components["schemas"]["ProductSummaryPage"];
+type CatalogContractCompatibility =
+  ContractCategory extends ApiCategory
+    ? ContractProduct extends ApiProduct
+      ? ContractProductPage extends ApiProductPage
+        ? true
+        : never
+      : never
+    : never;
+const catalogContractCompatibility: CatalogContractCompatibility = true;
+void catalogContractCompatibility;
+
 async function catalogJson<T>(
   path: string,
   schema: z.ZodType<T>,
@@ -130,33 +149,15 @@ export function fetchCategory(categoryId: string): Promise<ApiCategoryDetail | n
   );
 }
 
-export async function fetchProducts(): Promise<ApiProductPage> {
-  const roots = (await fetchCategories()).filter((category) => !category.parentId);
-  const pages = await Promise.all(
-    roots.map(async (category) => {
-      const items: ApiProductSummary[] = [];
-      const seenCursors = new Set<string>();
-      let cursor: string | undefined;
-      do {
-        const page = await fetchCategoryProducts(category.id, cursor);
-        if (!page) throw new Error("Products could not be loaded");
-        items.push(...page.items);
-        cursor = page.page.next ?? undefined;
-        if (cursor && seenCursors.has(cursor))
-          throw new Error("Catalog returned a repeated cursor");
-        if (cursor) seenCursors.add(cursor);
-      } while (cursor);
-      return items;
-    }),
-  );
-  const unique = new Map<string, ApiProductSummary>();
-  for (const page of pages)
-    for (const product of page) unique.set(product.id, product);
-  const items = [...unique.values()];
-  return {
-    items,
-    page: { size: items.length, next: null, total: items.length },
-  };
+export async function fetchProducts(cursor?: string): Promise<ApiProductPage> {
+  const params = new URLSearchParams({ size: "24" });
+  if (cursor) params.set("cursor", cursor);
+  const page = await catalogJson(`/products?${params}`, productPageSchema, [
+    "catalog",
+    "products",
+  ]);
+  if (!page) throw new Error("Products could not be loaded");
+  return page;
 }
 
 export async function fetchCategoryProducts(

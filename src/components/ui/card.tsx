@@ -8,7 +8,7 @@ import {
 
 export type CardProps = {
   children: ReactNode;
-  title?: string;
+  title?: string | undefined;
 };
 
 export function Card({ children, title }: CardProps) {

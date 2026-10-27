@@ -12,9 +12,9 @@ import { Button as PrimitiveButton } from "./primitives/button";
 export type StatusMessageProps = {
   kind: "info" | "success" | "error";
   message: string;
-  title?: string;
-  className?: string;
-  onDismiss?: () => void;
+  title?: string | undefined;
+  className?: string | undefined;
+  onDismiss?: (() => void) | undefined;
 };
 
 const icons = { info: Info, success: CheckCircle2, error: XCircle };

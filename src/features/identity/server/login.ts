@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { requestSession, type BackendSession } from "@/lib/api/identity";
+import { parseBackendSession, requestSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
 import { checkActionOrigin } from "@/lib/session/csrf";
 import {
@@ -59,13 +59,7 @@ export async function signInWithCredentials(
       };
     }
 
-    const session = (await response.json()) as BackendSession;
-    if (!session.accessToken || !session.refreshToken || !session.account?.id) {
-      return {
-        ok: false,
-        message: "Sign-in is unavailable right now. Try again shortly.",
-      };
-    }
+    const session = parseBackendSession(await response.json());
     await createSession(session);
     if (guestCartId && clearsGuestCartCookie(response.headers)) {
       cookieStore.delete(GUEST_CART_COOKIE);

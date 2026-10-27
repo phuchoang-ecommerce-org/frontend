@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { requestSession } from "./identity";
+import { parseBackendSession, requestSession } from "./identity";
 
 describe("requestSession", () => {
   afterEach(() => {
@@ -52,5 +52,36 @@ describe("requestSession", () => {
 
     const init = fetchMock.mock.calls.at(0)?.at(1) as RequestInit | undefined;
     expect(init?.headers).toEqual({ "Content-Type": "application/json" });
+  });
+});
+
+describe("parseBackendSession", () => {
+  it("accepts the contract session shape used for server-side custody", () => {
+    const value = {
+      accessToken: "access-token",
+      refreshToken: "refresh-token",
+      expiresIn: 900,
+      restricted: false,
+      account: {
+        id: "customer-id",
+        email: "customer@example.com",
+        status: "ACTIVE",
+        verificationStatus: "VERIFIED",
+        roles: ["CUSTOMER"],
+        createdAt: "2026-10-27T00:00:00Z",
+      },
+    };
+
+    expect(parseBackendSession(value)).toEqual(value);
+  });
+
+  it("rejects a session without a refresh token", () => {
+    expect(() =>
+      parseBackendSession({
+        accessToken: "access-token",
+        expiresIn: 900,
+        account: {},
+      }),
+    ).toThrow();
   });
 });

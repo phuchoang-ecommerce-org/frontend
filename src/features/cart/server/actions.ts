@@ -3,11 +3,15 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { backendRequest, readProblem } from "@/lib/api/backend";
+import {
+  backendRequest,
+  problemMessage,
+  readProblem,
+} from "@/lib/api/backend";
 import { checkActionOrigin } from "@/lib/session/csrf";
 import { getSession } from "@/lib/session";
 import type { CartChangeResult } from "../types";
-import { cartHeaders, GUEST_CART_COOKIE, type CartWire } from "./queries";
+import { cartHeaders, GUEST_CART_COOKIE, parseCartWire } from "./queries";
 
 function failed(message: string): CartChangeResult {
   return { ok: false, error: message };
@@ -23,15 +27,12 @@ async function writeCart(
     const response = await backendRequest(path, {
       method,
       headers: await cartHeaders(guestId),
-      body: body ? JSON.stringify(body) : undefined,
+      ...(body ? { body: JSON.stringify(body) } : {}),
     });
     if (!response.ok) {
       const problem = await readProblem(response);
       return failed(
-        response.status === 409
-          ? problem.detail ||
-              "Stock changed. Check the available quantity and try again."
-          : problem.detail || "Your cart could not be updated. Try again.",
+        problemMessage(problem, "Your cart could not be updated. Try again."),
       );
     }
     revalidatePath("/cart");
@@ -60,7 +61,7 @@ export async function addToCartAction(
     });
     if (!currentResponse.ok)
       return failed("Your cart could not be loaded. Try again.");
-    const cart = (await currentResponse.json()) as CartWire;
+    const cart = parseCartWire(await currentResponse.json());
     const result = await writeCart(
       "POST",
       `/carts/${cart.id}/lines`,
@@ -81,6 +82,7 @@ export async function addToCartAction(
     return failed("Your cart could not be updated. Try again.");
   }
 }
+
 
 export async function changeCartQuantityAction(
   cartId: string,

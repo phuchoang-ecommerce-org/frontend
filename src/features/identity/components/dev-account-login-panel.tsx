@@ -8,7 +8,7 @@ export function DevAccountLoginPanel({
   onSelect,
 }: {
   accounts: DevAccount[];
-  returnTo?: string;
+  returnTo?: string | undefined;
   onSelect: (accountKey: string, returnTo?: string) => Promise<FormResult>;
 }) {
   return (

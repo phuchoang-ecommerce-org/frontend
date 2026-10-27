@@ -1,6 +1,11 @@
 "use server";
 
-import { backendRequest, fieldErrors, readProblem } from "@/lib/api/backend";
+import {
+  backendRequest,
+  fieldErrors,
+  problemMessage,
+  readProblem,
+} from "@/lib/api/backend";
 import { checkActionOrigin } from "@/lib/session/csrf";
 import type { FormResult } from "../types";
 
@@ -24,7 +29,7 @@ async function submitGuestRequest(
     const problem = await readProblem(response);
     return {
       ok: false,
-      message: response.status === 429 ? "Too many requests. Wait and try again." : problem.detail || failureMessage,
+      message: problemMessage(problem, failureMessage),
       errors: fieldErrors(problem),
     };
   } catch {

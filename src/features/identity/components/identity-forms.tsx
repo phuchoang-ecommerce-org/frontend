@@ -9,9 +9,9 @@ import type { AddressDraft, FormResult, ProfileDraft } from "../types";
 type FieldSpec = {
   name: string;
   label: string;
-  type?: React.HTMLInputTypeAttribute;
-  autoComplete?: string;
-  required?: boolean;
+  type?: React.HTMLInputTypeAttribute | undefined;
+  autoComplete?: string | undefined;
+  required?: boolean | undefined;
 };
 function ManagedForm<T extends Record<string, string>>({
   initial,
@@ -26,9 +26,9 @@ function ManagedForm<T extends Record<string, string>>({
   fields: FieldSpec[];
   submitLabel: string;
   onSubmit: (values: T) => Promise<FormResult>;
-  successHref?: string;
-  errorTitle?: string;
-  showValidationNotice?: boolean;
+  successHref?: string | undefined;
+  errorTitle?: string | undefined;
+  showValidationNotice?: boolean | undefined;
 }) {
   const router = useRouter();
   const [values, setValues] = useState<T>(initial);
@@ -173,7 +173,7 @@ export function LoginForm({
     email: string;
     password: string;
   }) => Promise<FormResult>;
-  successHref?: string;
+  successHref?: string | undefined;
 }) {
   return (
     <ManagedForm

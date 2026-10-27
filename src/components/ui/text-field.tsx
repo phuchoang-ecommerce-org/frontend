@@ -7,15 +7,15 @@ import { Field, FieldDescription, FieldError, FieldLabel } from "./primitives/fi
 export type TextFieldProps = {
   name: string;
   label: string;
-  type?: React.HTMLInputTypeAttribute;
+  type?: React.HTMLInputTypeAttribute | undefined;
   value: string;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  autoComplete?: string;
-  disabled?: boolean;
+  required?: boolean | undefined;
+  hint?: string | undefined;
+  error?: string | undefined;
+  autoComplete?: string | undefined;
+  disabled?: boolean | undefined;
   onChange: (value: string) => void;
-  onBlur?: () => void;
+  onBlur?: (() => void) | undefined;
 };
 
 export function TextField({

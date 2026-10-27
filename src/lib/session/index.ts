@@ -2,7 +2,11 @@ import "server-only";
 
 import { randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import { renewSession, type BackendSession } from "@/lib/api/identity";
+import {
+  parseBackendSession,
+  renewSession,
+  type BackendSession,
+} from "@/lib/api/identity";
 
 const COOKIE_NAME = "ecp_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
@@ -53,7 +57,7 @@ export async function getSession(): Promise<StoredSession | null> {
       try {
         const response = await renewSession(stored.refreshToken);
         if (!response.ok) return null;
-        const next = storeValue((await response.json()) as BackendSession);
+        const next = storeValue(parseBackendSession(await response.json()));
         state.sessions.set(id, next);
         return next;
       } catch {

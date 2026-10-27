@@ -14,8 +14,8 @@ export function DevAccountLoginButton({
 }: {
   accountKey: string;
   label: string;
-  returnTo?: string;
-  pending?: boolean;
+  returnTo?: string | undefined;
+  pending?: boolean | undefined;
   onSelect: (accountKey: string, returnTo?: string) => Promise<FormResult>;
 }) {
   const router = useRouter();
