@@ -1,5 +1,7 @@
 import "server-only";
 
+import { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
+
 export type Account = {
   id: string;
   email: string;
@@ -28,7 +30,9 @@ export async function requestSession(
     headers: {
       "Content-Type": "application/json",
       ...(guestCartId
-        ? { Cookie: `ecp_guest_cart=${encodeURIComponent(guestCartId)}` }
+        ? {
+            Cookie: `${GUEST_CART_COOKIE}=${encodeURIComponent(guestCartId)}`,
+          }
         : {}),
     },
     body: JSON.stringify({ email, password }),

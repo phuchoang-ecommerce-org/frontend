@@ -8,6 +8,7 @@
     "build-webpack": "node scripts/with-profile.mjs next build --webpack",
     "start": "node scripts/with-profile.mjs next start",
     "lint": "node scripts/with-profile.mjs eslint",
+    "test": "vitest run --project unit",
     "storybook": "node scripts/with-profile.mjs storybook dev -p 6006",
     "build-storybook": "node scripts/with-profile.mjs storybook build"
   },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { LoginForm } from "@/features/identity/components/identity-forms";
@@ -10,6 +11,7 @@ import {
 import { devLoginAction } from "@/features/identity/server/dev-login";
 import { loginAction } from "@/features/identity/server/login";
 import { getSession } from "@/lib/session";
+import { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
 
 export const metadata: Metadata = { title: "Sign in | ECP" };
 
@@ -18,14 +20,20 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ returnTo?: string }>;
 }) {
-  const requested = (await searchParams).returnTo;
+  const [requested, session, cookieStore] = await Promise.all([
+    searchParams.then((params) => params.returnTo),
+    getSession(),
+    cookies(),
+  ]);
   const returnTo =
     requested?.startsWith("/") &&
     !requested.startsWith("//") &&
     !requested.includes("\\")
       ? requested
-      : "/welcome";
-  if (await getSession()) redirect(returnTo);
+      : cookieStore.has(GUEST_CART_COOKIE)
+        ? "/cart"
+        : "/welcome";
+  if (session) redirect(returnTo);
 
   return (
     <main className="min-h-screen bg-stone-50 px-4 py-6 text-stone-950 sm:py-16 [&_button]:min-h-11 [&_input]:h-11">

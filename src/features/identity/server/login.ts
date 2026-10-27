@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { requestSession, type BackendSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
 import { checkActionOrigin } from "@/lib/session/csrf";
+import {
+  clearsGuestCartCookie,
+  GUEST_CART_COOKIE,
+} from "@/lib/session/guest-cart";
 import type { FormResult } from "../types";
 
 export async function signInWithCredentials(
@@ -29,7 +33,7 @@ export async function signInWithCredentials(
 
   try {
     const cookieStore = await cookies();
-    const guestCartId = cookieStore.get("ecp_guest_cart")?.value;
+    const guestCartId = cookieStore.get(GUEST_CART_COOKIE)?.value;
     const response = await requestSession(email.trim(), password, guestCartId);
     if (response.status === 429) {
       const seconds = Number(response.headers.get("retry-after"));
@@ -63,13 +67,8 @@ export async function signInWithCredentials(
       };
     }
     await createSession(session);
-    if (
-      guestCartId &&
-      /ecp_guest_cart=.*max-age=0/i.test(
-        response.headers.get("set-cookie") ?? "",
-      )
-    ) {
-      cookieStore.delete("ecp_guest_cart");
+    if (guestCartId && clearsGuestCartCookie(response.headers)) {
+      cookieStore.delete(GUEST_CART_COOKIE);
     }
     return { ok: true };
   } catch {
