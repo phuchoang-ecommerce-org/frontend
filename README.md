@@ -25,3 +25,19 @@ The dev-account sign-in panel appears on `/login` only when the frontend profile
 See the [frontend dev-account design](../docs/SolutionArchitecture/03-frontend/Component-Design/dev-account-login.md) and [integration plan](../docs/ProductManager/integration-plan.md) for the intended login and API configuration.
 
 Open [http://localhost:3000](http://localhost:3000) after starting the development server.
+
+## F1 contract and architecture gates
+
+The frontend consumes the normative contract at
+`../docs/SolutionArchitecture/04-shared/OpenAPI/openapi.yaml`.
+
+```bash
+npm run contract:generate # refresh src/lib/api/types.ts
+npm run contract:check    # fail when checked-in types drift
+npm run mock:api          # Prism on http://127.0.0.1:4010
+npm run check             # contract, types, lint, boundaries, and unit tests
+```
+
+Point `ECP_API_BASE_URL` at `http://127.0.0.1:4010` to render against Prism,
+or at `http://localhost:8080/api/v1` to use the real API. Both paths use the
+same server-only backend client.

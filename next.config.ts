@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    qualities: [75],
+    remotePatterns: [
+      new URL("https://cdn.ecp.example/**"),
+      new URL("http://example.com/**"),
+    ],
+  },
   logging: {
     serverFunctions: false,
   },
