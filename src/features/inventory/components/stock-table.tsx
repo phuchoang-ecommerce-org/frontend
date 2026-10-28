@@ -23,8 +23,8 @@ export function StockTable({ items }: { items: StockItem[] }) {
         <TableHeader>
           <TableRow>
             <TableHead>SKU</TableHead>
-            <TableHead>Product</TableHead>
             <TableHead>Warehouse</TableHead>
+            <TableHead className="text-right">On hand</TableHead>
             <TableHead className="text-right">Available</TableHead>
             <TableHead className="text-right">Reserved</TableHead>
           </TableRow>
@@ -33,8 +33,10 @@ export function StockTable({ items }: { items: StockItem[] }) {
           {items.map((item) => (
             <TableRow key={item.id}>
               <TableCell className="font-medium">{item.sku}</TableCell>
-              <TableCell>{item.productName}</TableCell>
               <TableCell>{item.warehouse}</TableCell>
+              <TableCell className="text-right tabular-nums">
+                {item.onHand}
+              </TableCell>
               <TableCell className="text-right tabular-nums">
                 {item.available}
               </TableCell>
