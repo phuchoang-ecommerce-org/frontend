@@ -163,6 +163,11 @@ export function AddressBook({
         router.refresh();
       }
       return result;
+    } catch {
+      return {
+        ok: false as const,
+        message: "The address could not be saved. Try again.",
+      };
     } finally {
       setPending(false);
     }
@@ -178,6 +183,11 @@ export function AddressBook({
         setRemoving(null);
         router.refresh();
       }
+    } catch {
+      setMessage({
+        ok: false,
+        message: "The address could not be removed. Try again.",
+      });
     } finally {
       setPending(false);
     }
@@ -193,6 +203,11 @@ export function AddressBook({
       );
       setMessage(result);
       if (result.ok) router.refresh();
+    } catch {
+      setMessage({
+        ok: false,
+        message: "The default address could not be updated. Try again.",
+      });
     } finally {
       setPending(false);
     }
