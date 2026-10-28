@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { parseBackendSession, requestSession } from "./identity";
+import {
+  endAllSessions,
+  endSession,
+  parseBackendSession,
+  requestSession,
+} from "./identity";
 
 describe("requestSession", () => {
   afterEach(() => {
@@ -10,7 +15,7 @@ describe("requestSession", () => {
     vi.unstubAllGlobals();
   });
 
-  it("sends the guest cart in both the contract body and current backend cookie", async () => {
+  it("sends the guest cart through the contract request body", async () => {
     vi.stubEnv("ECP_API_BASE_URL", "http://backend.test/api/v1/");
     const fetchMock = vi
       .fn<typeof fetch>()
@@ -20,7 +25,7 @@ describe("requestSession", () => {
     await requestSession(
       "customer@example.com",
       "correct horse battery staple",
-      "guest-cart-id",
+      "018f3c2a-0000-7000-8000-000000000000",
     );
 
     expect(fetchMock).toHaveBeenCalledOnce();
@@ -29,14 +34,11 @@ describe("requestSession", () => {
       expect.objectContaining({
         method: "POST",
         cache: "no-store",
-        headers: {
-          "Content-Type": "application/json",
-          Cookie: "ecp_guest_cart=guest-cart-id",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email: "customer@example.com",
           password: "correct horse battery staple",
-          guestCartId: "guest-cart-id",
+          guestCartId: "018f3c2a-0000-7000-8000-000000000000",
         }),
       }),
     );
@@ -90,7 +92,7 @@ describe("parseBackendSession", () => {
     ).toThrow();
   });
 
-  it("accepts current backend cart merge notices during contract migration", () => {
+  it("accepts the contract cart merge outcome", () => {
     const value = {
       accessToken: "access-token",
       refreshToken: "refresh-token",
@@ -103,9 +105,39 @@ describe("parseBackendSession", () => {
         roles: ["CUSTOMER"],
         createdAt: "2026-10-27T00:00:00Z",
       },
-      cartMergeNotices: ["An item quantity was reduced."],
+      cartMerge: {
+        merged: true,
+        adjustments: [
+          {
+            variantId: "variant-id",
+            outcome: "QUANTITY_CAPPED",
+            appliedQuantity: 2,
+          },
+        ],
+      },
     };
 
     expect(parseBackendSession(value)).toEqual(value);
+  });
+});
+
+describe("session invalidation requests", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("surfaces a rejected backend logout so the caller can record it", async () => {
+    vi.stubEnv("ECP_API_BASE_URL", "http://backend.test/api/v1");
+    vi.stubGlobal("fetch", vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(null, { status: 503 }),
+    ));
+
+    await expect(endSession("refresh-token")).rejects.toThrow(
+      "Backend session invalidation failed",
+    );
+    await expect(endAllSessions("access-token")).rejects.toThrow(
+      "Backend session invalidation failed",
+    );
   });
 });

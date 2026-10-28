@@ -10,6 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 The document of this project is at [Document](~/Local-Document/ecommerce/docs/). Any implementation decision should come from  this document.
 
+The backend of this project is at [Backend](~/Local-Document/ecommerce/backend/). If you need the backend to test something, start the local JDK Environment, DON'T start with termurin eclipse jdk in Docker setup.
 <!-- BEGIN:nextjs-agent-feedback -->
 
 ## Report Next.js feedback

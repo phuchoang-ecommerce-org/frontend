@@ -58,14 +58,28 @@ export async function getSession(): Promise<StoredSession | null> {
       const latest = await store.get(id);
       if (!latest) return null;
       if (latest.expiresAt > Date.now() + REFRESH_WINDOW_MS) return latest;
-      const response = await renewSession(latest.refreshToken);
+      let response: Response;
+      try {
+        response = await renewSession(latest.refreshToken);
+      } catch {
+        // Keep the stored session so a temporary identity-service outage does
+        // not revoke it. Callers must not use the expired access token.
+        return null;
+      }
       if (!response.ok) {
         await store.delete(id);
         return null;
       }
-      const next = storeValue(parseBackendSession(await response.json()));
-      await store.set(id, next);
-      return next;
+      try {
+        const next = storeValue(parseBackendSession(await response.json()));
+        await store.set(id, next);
+        return next;
+      } catch {
+        // A successful renewal must still satisfy the reviewed response
+        // schema. Treat malformed token responses as a terminal session.
+        await store.delete(id).catch(() => undefined);
+        return null;
+      }
     } catch {
       return null;
     } finally {

@@ -49,8 +49,6 @@ const session = {
 function successfulLogin(
   options: {
     merged?: boolean;
-    notices?: string[];
-    setCookie?: string;
   } = {},
 ): Response {
   return new Response(
@@ -59,16 +57,8 @@ function successfulLogin(
       ...(options.merged === undefined
         ? {}
         : { cartMerge: { merged: options.merged } }),
-      ...(options.notices === undefined
-        ? {}
-        : { cartMergeNotices: options.notices }),
     }),
-    {
-      status: 201,
-      ...(options.setCookie
-        ? { headers: { "Set-Cookie": options.setCookie } }
-        : {}),
-    },
+    { status: 201 },
   );
 }
 
@@ -79,13 +69,10 @@ describe("signInWithCredentials guest cart migration", () => {
     dependencyMocks.checkActionCsrf.mockResolvedValue(true);
   });
 
-  it("removes the browser cookie when the current backend confirms a successful merge", async () => {
+  it("removes the browser cookie when the contract confirms a successful merge", async () => {
     cookieMocks.guestCartId = "guest-cart-id";
     dependencyMocks.requestSession.mockResolvedValue(
-      successfulLogin({
-        setCookie:
-          "ecp_guest_cart=; Path=/api/v1/carts; Max-Age=0; Secure; HttpOnly; SameSite=Lax",
-      }),
+      successfulLogin({ merged: true }),
     );
 
     const result = await signInWithCredentials(
@@ -106,28 +93,10 @@ describe("signInWithCredentials guest cart migration", () => {
     expect(cookieMocks.delete).toHaveBeenCalledWith("ecp_guest_cart");
   });
 
-  it("also removes the browser cookie for the contract merge outcome", async () => {
+  it("keeps login successful and preserves the guest cart when the merge fails", async () => {
     cookieMocks.guestCartId = "guest-cart-id";
     dependencyMocks.requestSession.mockResolvedValue(
-      successfulLogin({ merged: true }),
-    );
-
-    const result = await signInWithCredentials(
-      "customer@example.com",
-      "password",
-      "csrf-token",
-    );
-
-    expect(result).toEqual({ ok: true });
-    expect(cookieMocks.delete).toHaveBeenCalledWith("ecp_guest_cart");
-  });
-
-  it("keeps login successful and preserves the guest cart when the current backend merge fails", async () => {
-    const notice =
-      "Your guest cart could not be recovered yet; retrying sign-in will recover your items.";
-    cookieMocks.guestCartId = "guest-cart-id";
-    dependencyMocks.requestSession.mockResolvedValue(
-      successfulLogin({ notices: [notice] }),
+      successfulLogin({ merged: false }),
     );
 
     const result = await signInWithCredentials(
@@ -138,7 +107,7 @@ describe("signInWithCredentials guest cart migration", () => {
 
     expect(result).toEqual({ ok: true });
     expect(dependencyMocks.createSession).toHaveBeenCalledWith(
-      expect.objectContaining({ cartMergeNotices: [notice] }),
+      expect.objectContaining({ cartMerge: { merged: false } }),
     );
     expect(cookieMocks.delete).not.toHaveBeenCalled();
   });

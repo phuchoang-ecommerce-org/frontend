@@ -1,6 +1,6 @@
 # F1 contract and IH-1 verification record
 
-**Checked:** 2026-10-27  
+**Checked:** 2026-10-28  
 **Contract:** `../../docs/SolutionArchitecture/04-shared/OpenAPI/openapi.yaml`
 
 This record separates implemented frontend work from integration evidence. A
@@ -23,8 +23,8 @@ boundaries, and dependency-cycle checks are part of `npm run check`.
 
 | ID | Evidence | Owner and target |
 | --- | --- | --- |
-| F1-CONTRACT-01 | The contract sends optional `guestCartId` in `CredentialsRequest` and returns `Session.cartMerge`. The current real API instead reads `ecp_guest_cart` and returns `cartMergeNotices`. The frontend keeps the existing real-API transport temporarily so sign-in does not lose the guest cart; it does not add a mock-only branch. | Backend + contract owners, F1 contract-amendment session. Amend the contract or real API, regenerate types, then remove the temporary extension. |
-| F1-CONTRACT-02 | The real cart response includes `expired` and `availableQuantity`, neither of which exists in the normative cart schema. | Backend + contract owners, F1 contract-amendment session. The frontend now derives expiry from `status` and shows a non-numeric stock-short message, so it no longer depends on either extension. |
+| F1-CONTRACT-01 | **Code alignment completed 2026-10-28.** `CredentialsRequest.guestCartId` is now the only guest-cart merge transport; the backend returns the normative structured `Session.cartMerge` outcome instead of `cartMergeNotices`. The frontend removed its temporary cookie-header and notice compatibility paths. Focused backend MVC and frontend unit tests pass. | Frontend + backend, F1 live smoke / Contract Sync: verify the deployed API and browser flow with a real guest cart. |
+| F1-CONTRACT-02 | **Code alignment completed 2026-10-28.** Public Cart DTOs no longer serialize `expired` or `availableQuantity`; those values remain internal only. The frontend continues to derive expiry from `status` and renders a non-numeric stock-short message. Focused backend MVC and mapper tests pass. | Frontend + backend, F1 live smoke / Contract Sync: verify the deployed API Cart response against the normative contract. |
 | F1-CONTRACT-03 | **Resolved 2026-10-27.** The backend now exposes guest-readable `GET /products`, backed by the catalog's cursor-paginated query path. Live pages of two then one seeded product returned `200`, with a stable total of three. | Backend owner, F1. Regression coverage protects the exact public route, global listing query, cursor scope, SQL, and cache invalidation. |
 | F1-CONTRACT-04 | **Resolved 2026-10-27.** Cart's public `Money.amount` now uses the established decimal-string wire serializer while retaining `BigDecimal` for internal arithmetic. A live guest cart returned `"amount":"0"`, which the frontend parser accepted. | Backend owner, F1. MVC coverage asserts the JSON string representation. |
 
