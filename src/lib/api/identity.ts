@@ -78,17 +78,19 @@ export async function renewSession(refreshToken: string): Promise<Response> {
 }
 
 export async function endSession(refreshToken: string): Promise<void> {
-  await backendRequest("/sessions/current", {
+  const response = await backendRequest("/sessions/current", {
     method: "DELETE",
     body: JSON.stringify({ refreshToken }),
     cache: "no-store",
   });
+  if (!response.ok) throw new Error("Backend session invalidation failed");
 }
 
 export async function endAllSessions(accessToken: string): Promise<void> {
-  await backendRequest("/sessions", {
+  const response = await backendRequest("/sessions", {
     method: "DELETE",
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
   });
+  if (!response.ok) throw new Error("Backend session invalidation failed");
 }

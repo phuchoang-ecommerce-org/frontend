@@ -2,7 +2,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { parseBackendSession, requestSession } from "./identity";
+import {
+  endAllSessions,
+  endSession,
+  parseBackendSession,
+  requestSession,
+} from "./identity";
 
 describe("requestSession", () => {
   afterEach(() => {
@@ -113,5 +118,26 @@ describe("parseBackendSession", () => {
     };
 
     expect(parseBackendSession(value)).toEqual(value);
+  });
+});
+
+describe("session invalidation requests", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("surfaces a rejected backend logout so the caller can record it", async () => {
+    vi.stubEnv("ECP_API_BASE_URL", "http://backend.test/api/v1");
+    vi.stubGlobal("fetch", vi.fn<typeof fetch>().mockResolvedValue(
+      new Response(null, { status: 503 }),
+    ));
+
+    await expect(endSession("refresh-token")).rejects.toThrow(
+      "Backend session invalidation failed",
+    );
+    await expect(endAllSessions("access-token")).rejects.toThrow(
+      "Backend session invalidation failed",
+    );
   });
 });

@@ -3,7 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 const sessionId = "concurrent-refresh-session";
-const renewSession = vi.hoisted(() => vi.fn());
+const dependencyMocks = vi.hoisted(() => ({
+  renewSession: vi.fn(),
+  parseBackendSession: vi.fn((value: unknown) => value),
+}));
 
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
@@ -15,12 +18,14 @@ vi.mock("next/headers", () => ({
 }));
 
 vi.mock("@/lib/api/identity", () => ({
-  renewSession,
-  parseBackendSession: (value: unknown) => value,
+  renewSession: dependencyMocks.renewSession,
+  parseBackendSession: dependencyMocks.parseBackendSession,
 }));
 
 import { getSession } from "./index";
 import { sessionStore, type StoredSession } from "./store";
+
+const { parseBackendSession, renewSession } = dependencyMocks;
 
 const expiredSession: StoredSession = {
   accessToken: "expired-access",
@@ -40,6 +45,7 @@ const expiredSession: StoredSession = {
 describe("session renewal", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    parseBackendSession.mockImplementation((value: unknown) => value);
     vi.stubEnv("NODE_ENV", "test");
     vi.stubEnv("ECP_SESSION_REDIS_URL", "");
     await sessionStore().set(sessionId, expiredSession);
@@ -65,5 +71,22 @@ describe("session renewal", () => {
       "fresh-access",
       "fresh-access",
     ]);
+  });
+
+  it("ends the server-side session when the refresh token is rejected", async () => {
+    renewSession.mockResolvedValue(new Response(null, { status: 401 }));
+
+    await expect(getSession()).resolves.toBeNull();
+    await expect(sessionStore().get(sessionId)).resolves.toBeNull();
+  });
+
+  it("ends the server-side session when a successful renewal has an invalid body", async () => {
+    renewSession.mockResolvedValue(new Response("{}", { status: 200 }));
+    parseBackendSession.mockImplementationOnce(() => {
+      throw new Error("invalid session response");
+    });
+
+    await expect(getSession()).resolves.toBeNull();
+    await expect(sessionStore().get(sessionId)).resolves.toBeNull();
   });
 });
