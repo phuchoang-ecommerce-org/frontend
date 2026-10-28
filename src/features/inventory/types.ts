@@ -1,8 +1,8 @@
 export type StockItem = {
   id: string;
   sku: string;
-  productName: string;
   warehouse: string;
+  onHand: number;
   available: number;
   reserved: number;
   updatedAt?: string;

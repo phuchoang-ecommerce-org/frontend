@@ -338,8 +338,8 @@ export const Inventory: Story = {
           {
             id: "1",
             sku: "SHIRT-BLK-M",
-            productName: "Cotton shirt",
             warehouse: "North",
+            onHand: 21,
             available: 18,
             reserved: 3,
           },
