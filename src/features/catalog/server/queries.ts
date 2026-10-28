@@ -43,6 +43,12 @@ function sameMoney(left?: ApiMoney | null, right?: ApiMoney | null): boolean {
   );
 }
 
+function isPublished(item: { publicationStatus: string }): boolean {
+  // PublicationStatus is deliberately an open contract vocabulary. Treating
+  // anything other than the shopper-visible value as hidden is fail-closed.
+  return item.publicationStatus === "PUBLISHED";
+}
+
 function productView(item: ApiProductSummary): Product {
   const priceFrom = formatMoney(item.priceFrom ?? null);
   const productImageUrl = imageUrl(item.primaryImageUrl);
@@ -75,7 +81,7 @@ export async function getProducts(cursor?: string): Promise<{
 }> {
   const page = await fetchProducts(cursor);
   return {
-    products: page.items.map(productView),
+    products: page.items.filter(isPublished).map(productView),
     ...(page.page.next ? { nextCursor: page.page.next } : {}),
   };
 }
@@ -105,7 +111,7 @@ export async function getCategoryProducts(
   const page = await fetchCategoryProducts(categoryId, cursor);
   if (!page) return null;
   return {
-    products: page.items.map(productView),
+    products: page.items.filter(isPublished).map(productView),
     ...(page.page.next ? { nextCursor: page.page.next } : {}),
   };
 }
@@ -114,7 +120,7 @@ export async function getProduct(
   productId: string,
 ): Promise<ProductDetailData | null> {
   const item = await fetchProduct(productId);
-  if (!item) return null;
+  if (!item || !isPublished(item)) return null;
   const image = [...item.images].sort(
     (left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0),
   )[0];
