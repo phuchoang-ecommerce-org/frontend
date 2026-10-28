@@ -20,7 +20,16 @@ ECP_DEMO_LOGIN_ENABLED=true
 ECP_DEMO_PASSWORD=<backend seed password>
 CSRF_SECRET=<at least 32 random characters>
 ECP_SESSION_REDIS_URL=redis://localhost:6380
+ECP_REVALIDATE_SECRET=<same high-entropy value configured in ecp-api>
 ```
+
+For signed catalog revalidation, configure `ECP_REVALIDATE_SECRET` independently
+in both lanes, using the exact same value. Configure the backend's
+`ECP_REVALIDATION_URL` to the frontend's internal
+`/api/internal/revalidate` URL for the environment; do not expose this route
+through a public callback integration. Generate and distribute the secret via
+the deployment secret store (for a local-only value, `openssl rand -hex 32` is
+sufficient). Never commit it in `.env.local` or source control.
 
 The dev-account sign-in panel appears on `/login` only when the frontend profile is `dev`, demo login is enabled, and the backend URL is on the local/dev allowlist. Its server action checks the same gate. In `prod`, the script forces `ECP_DEMO_LOGIN_ENABLED=false`; the panel is omitted from the login page and from the Vite-built Storybook preview. Stop an existing dev server before switching profiles so `localhost:3000` serves the selected profile.
 
