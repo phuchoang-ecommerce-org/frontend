@@ -8,6 +8,8 @@ export type CartLineData = {
   lineTotal: string;
   notice?: string;
   available: boolean;
+  priceChanged: boolean;
+  stockShort: boolean;
 };
 export type CartChangeResult = { ok: true } | { ok: false; error: string };
 export type CartTotals = {
@@ -16,6 +18,7 @@ export type CartTotals = {
   discount?: string;
   total: string;
   canCheckout: boolean;
+  checkoutMessage?: string;
 };
 export type WishlistItemData = {
   id: string;

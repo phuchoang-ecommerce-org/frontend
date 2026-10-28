@@ -10,6 +10,11 @@ const runtime = globalThis as typeof globalThis & {
   __ecpDevelopmentCsrfSecret?: string;
 };
 
+function secureCookie(): boolean {
+  const profile = process.env.ECP_FRONTEND_PROFILE;
+  return profile === "prod" || (profile === undefined && process.env.NODE_ENV === "production");
+}
+
 function csrfSecret(): string {
   const configured = process.env.CSRF_SECRET;
   if (configured) return configured;
@@ -47,7 +52,7 @@ export async function issueCsrfToken(
   const token = `${nonce}.${sign(nonce)}`;
   (await cookies()).set(CSRF_COOKIE, token, {
     httpOnly: false,
-    secure: true,
+    secure: secureCookie(),
     sameSite,
     path: "/",
     maxAge: CSRF_MAX_AGE_SECONDS,

@@ -47,7 +47,20 @@ describe("signed double-submit CSRF", () => {
     expect(requestState.set).toHaveBeenCalledWith(
       "ecp_csrf",
       token,
-      expect.objectContaining({ httpOnly: false, secure: true, sameSite: "lax" }),
+      expect.objectContaining({ httpOnly: false, secure: false, sameSite: "lax" }),
+    );
+  });
+
+  it("keeps the CSRF cookie secure in the production profile", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("ECP_FRONTEND_PROFILE", "prod");
+
+    await issueCsrfToken();
+
+    expect(requestState.set).toHaveBeenCalledWith(
+      "ecp_csrf",
+      expect.any(String),
+      expect.objectContaining({ secure: true }),
     );
   });
 

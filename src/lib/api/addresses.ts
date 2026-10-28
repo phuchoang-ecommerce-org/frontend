@@ -25,8 +25,11 @@ const addressSchema = z.object({
 const addressPageSchema = z.object({
   items: z.array(addressSchema),
   page: z.object({
-    size: z.number().int().positive(),
-    next: z.string().optional(),
+    // The live API returns zero for an empty page even though the OpenAPI
+    // request page-size constraint starts at one. A page with zero items is
+    // still a valid address-book result and must allow the first address form.
+    size: z.number().int().nonnegative(),
+    next: z.string().min(1).optional(),
     total: z.number().int().nonnegative().optional(),
   }),
 });
@@ -38,12 +41,31 @@ function bearer(accessToken: string): HeadersInit {
 export async function listAddresses(
   accessToken: string,
 ): Promise<CustomerAddress[]> {
-  const response = await backendRequest("/accounts/me/addresses?size=100", {
-    headers: bearer(accessToken),
-    cache: "no-store",
-  });
-  if (!response.ok) throw response;
-  return addressPageSchema.parse(await response.json()).items as CustomerAddress[];
+  const addresses: CustomerAddress[] = [];
+  const seenCursors = new Set<string>();
+  let cursor: string | undefined;
+
+  do {
+    const query = new URLSearchParams({ size: "100" });
+    if (cursor) query.set("cursor", cursor);
+    const response = await backendRequest(
+      `/accounts/me/addresses?${query.toString()}`,
+      {
+        headers: bearer(accessToken),
+        cache: "no-store",
+      },
+    );
+    if (!response.ok) throw response;
+    const page = addressPageSchema.parse(await response.json());
+    addresses.push(...(page.items as CustomerAddress[]));
+    cursor = page.page.next;
+    if (cursor && seenCursors.has(cursor)) {
+      throw new Error("Address pagination returned a repeated cursor");
+    }
+    if (cursor) seenCursors.add(cursor);
+  } while (cursor);
+
+  return addresses;
 }
 
 export async function createAddress(

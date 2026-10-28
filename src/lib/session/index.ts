@@ -30,13 +30,18 @@ function sameSiteFor(session: BackendSession): "lax" | "strict" {
     : "lax";
 }
 
+function secureCookie(): boolean {
+  const profile = process.env.ECP_FRONTEND_PROFILE;
+  return profile === "prod" || (profile === undefined && process.env.NODE_ENV === "production");
+}
+
 export async function createSession(session: BackendSession): Promise<void> {
   const id = randomBytes(32).toString("hex");
   const sameSite = sameSiteFor(session);
   await sessionStore().set(id, storeValue(session));
   (await cookies()).set(COOKIE_NAME, id, {
     httpOnly: true,
-    secure: true,
+    secure: secureCookie(),
     sameSite,
     path: "/",
     maxAge: SESSION_MAX_AGE_SECONDS,
