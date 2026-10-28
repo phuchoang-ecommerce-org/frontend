@@ -1,7 +1,6 @@
 import "server-only";
 
 import { z } from "zod";
-import { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
 import { backendRequest } from "./backend";
 import type { components } from "./types";
 
@@ -10,8 +9,6 @@ type CredentialsRequest = components["schemas"]["CredentialsRequest"];
 
 export type BackendSession = Omit<ContractSession, "refreshToken"> & {
   refreshToken: string;
-  // Temporary real-API extension tracked in docs/f1-contract-and-ih1-findings.md.
-  cartMergeNotices?: string[];
 };
 
 const accountSchema = z.object({
@@ -48,7 +45,6 @@ const backendSessionSchema = z.object({
   restricted: z.boolean().optional(),
   account: accountSchema,
   cartMerge: cartMergeSchema.optional(),
-  cartMergeNotices: z.array(z.string()).optional(),
 });
 
 export function parseBackendSession(value: unknown): BackendSession {
@@ -68,13 +64,6 @@ export async function requestSession(
 
   return backendRequest("/sessions", {
     method: "POST",
-    ...(guestCartId
-      ? {
-          headers: {
-            Cookie: `${GUEST_CART_COOKIE}=${encodeURIComponent(guestCartId)}`,
-          },
-        }
-      : {}),
     body: JSON.stringify(body),
     cache: "no-store",
   });

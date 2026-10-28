@@ -11,7 +11,6 @@ import type { StoredSession } from "@/lib/session";
 export const metadata: Metadata = { title: "Cart | ECP" };
 
 function cartMergeMessages(session: StoredSession | null): string[] {
-  if (session?.cartMergeNotices?.length) return session.cartMergeNotices;
   const merge = session?.cartMerge;
   if (!merge) return [];
   if (!merge.merged) {

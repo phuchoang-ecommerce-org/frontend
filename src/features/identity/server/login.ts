@@ -4,10 +4,7 @@ import { cookies } from "next/headers";
 import { parseBackendSession, requestSession } from "@/lib/api/identity";
 import { createSession } from "@/lib/session";
 import { checkActionCsrf } from "@/lib/session/csrf";
-import {
-  clearsGuestCartCookie,
-  GUEST_CART_COOKIE,
-} from "@/lib/session/guest-cart";
+import { GUEST_CART_COOKIE } from "@/lib/session/guest-cart";
 import type { FormResult } from "../types";
 
 export async function signInWithCredentials(
@@ -62,10 +59,7 @@ export async function signInWithCredentials(
 
     const session = parseBackendSession(await response.json());
     await createSession(session);
-    if (
-      guestCartId &&
-      (session.cartMerge?.merged || clearsGuestCartCookie(response.headers))
-    ) {
+    if (guestCartId && session.cartMerge?.merged) {
       cookieStore.delete(GUEST_CART_COOKIE);
     }
     return { ok: true };
