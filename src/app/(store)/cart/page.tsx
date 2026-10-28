@@ -8,7 +8,10 @@ import { cartDisplay, getCurrentCart } from "@/features/cart/server/queries";
 import { getSession } from "@/lib/session";
 import type { StoredSession } from "@/lib/session";
 
-export const metadata: Metadata = { title: "Cart | ECP" };
+export const metadata: Metadata = {
+  title: "Cart | ECP",
+  robots: { index: false, follow: false },
+};
 
 function cartMergeMessages(session: StoredSession | null): string[] {
   const merge = session?.cartMerge;
@@ -41,7 +44,20 @@ export default async function CartPage() {
           <StatusMessage kind="info" message={notice} />
         </div>
       ))}
-      {expired && <div className="mb-5"><StatusMessage kind="info" message="Your previous cart expired. Start a new cart by adding a product." /></div>}
+      {expired && (
+        <div className="mb-5 space-y-2">
+          <StatusMessage
+            kind="info"
+            message="Your previous cart expired. Start a new cart by adding a product."
+          />
+          <Link
+            href="/products"
+            className="inline-flex text-sm font-medium underline underline-offset-4"
+          >
+            Start a new cart
+          </Link>
+        </div>
+      )}
       {!lines.length ? (
         <EmptyState title="Your cart is empty" message="Browse products to find something to add." actionLabel="View products" actionHref="/products" />
       ) : (

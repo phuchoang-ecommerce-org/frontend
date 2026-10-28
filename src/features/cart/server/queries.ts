@@ -88,6 +88,8 @@ export function cartDisplay(cart: CartWire | null): {
       unitPrice: formatMoney(line.unitPrice ?? null),
       lineTotal: formatMoney(line.lineTotal ?? null),
       available: line.purchasable !== false,
+      priceChanged: line.priceChanged === true,
+      stockShort: line.stockShort === true,
       ...(line.stockShort
         ? {
             notice:
@@ -97,6 +99,8 @@ export function cartDisplay(cart: CartWire | null): {
           ? { notice: line.unpurchasableReason }
           : {}),
     })) ?? [];
+  const hasUnavailableLine = lines.some((line) => !line.available);
+  const hasStockShortLine = lines.some((line) => line.stockShort);
   return {
     lines,
     totals: {
@@ -105,8 +109,17 @@ export function cartDisplay(cart: CartWire | null): {
       canCheckout: Boolean(
         lines.length &&
           lines.every((line) => line.available) &&
+          !hasStockShortLine &&
           cart?.status !== "EXPIRED",
       ),
+      ...(hasStockShortLine
+        ? {
+            checkoutMessage:
+              "Reduce the quantities marked with low stock before checkout.",
+          }
+        : hasUnavailableLine
+          ? { checkoutMessage: "Resolve unavailable items before checkout." }
+          : {}),
     },
     expired: cart?.status === "EXPIRED",
   };

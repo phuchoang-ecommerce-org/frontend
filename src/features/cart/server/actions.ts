@@ -37,6 +37,7 @@ async function writeCart(
     }
     revalidatePath("/cart");
     revalidatePath("/products");
+    revalidatePath("/", "layout");
     return { ok: true };
   } catch {
     return failed("Your cart could not be updated. Try again.");

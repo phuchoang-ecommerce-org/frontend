@@ -49,6 +49,12 @@ export function CartLine({
           message={line.notice}
         />
       )}
+      {line.priceChanged && (
+        <StatusMessage
+          kind="info"
+          message="The current price changed since this item was added. Review the updated total before checkout."
+        />
+      )}
       <div className="flex flex-wrap items-end gap-2">
         <label className="text-sm font-medium">
           Quantity

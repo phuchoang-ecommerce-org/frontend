@@ -42,7 +42,7 @@ export function CartSummary({
         </Link>
       ) : (
         <p className="mt-4 text-sm text-muted-foreground">
-          Resolve unavailable items before checkout.
+          {summary.checkoutMessage ?? "Resolve unavailable items before checkout."}
         </p>
       )}
     </Card>

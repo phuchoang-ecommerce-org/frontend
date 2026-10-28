@@ -134,6 +134,8 @@ export const Cart: Story = {
             unitPrice: "$24.00",
             lineTotal: "$48.00",
             available: true,
+            priceChanged: false,
+            stockShort: false,
           }}
           onQuantityChange={async () => ({
             ok: false,
