@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Button, Card, StatusMessage, TextField } from "@/components/ui";
 import { csrfToken } from "@/lib/session/client-csrf";
 import { formatMoney } from "@/lib/format/money";
@@ -13,6 +14,8 @@ import {
   choosePaymentMethodAction,
   chooseShippingAddressAction,
   chooseShippingOptionAction,
+  applyVoucherAction,
+  removeVoucherAction,
   type CheckoutActionResult,
 } from "../server/actions";
 
@@ -32,6 +35,7 @@ export function CheckoutFlow({ checkout, addresses, paymentMethods }: { checkout
   const [shippingDraft, setShippingDraft] = useState<DraftAddress>(emptyAddress);
   const [billingDraft, setBillingDraft] = useState<DraftAddress>(emptyAddress);
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(Boolean(checkout.order.billingAddress && checkout.order.shippingAddress));
+  const [voucherCode, setVoucherCode] = useState("");
   const [pending, startTransition] = useTransition();
   const shippingOptions = checkout.shippingOptions?.map((option) => ({
     id: option.id,
@@ -82,8 +86,15 @@ export function CheckoutFlow({ checkout, addresses, paymentMethods }: { checkout
         <Card title="4. Payment method">
           <fieldset className="space-y-2"><legend className="sr-only">Payment method</legend>{paymentMethods.map((method) => <label key={method.type} className="flex cursor-pointer items-start justify-between gap-3 rounded-card border border-border p-3 has-checked:border-primary"><span className="flex gap-3"><input type="radio" name="payment-method" checked={checkout.paymentMethod?.type === method.type} disabled={!method.eligible || pending} onChange={() => run((token) => choosePaymentMethodAction(checkout.order.id, method.type, token))} className="mt-1 accent-primary" /><span><strong>{method.displayName || method.type}</strong>{!method.eligible && <span className="block text-sm text-muted-foreground">{method.ineligibleReason || "Unavailable for this order."}</span>}</span></span>{method.eligible && <span className="text-sm text-muted-foreground">Available</span>}</label>)}{!paymentMethods.length && <p className="text-sm text-muted-foreground">Payment methods will be available after delivery details are complete.</p>}</fieldset>
         </Card>
+        <Card title="Voucher">
+          <form className="flex flex-col gap-3 sm:flex-row" onSubmit={(event) => { event.preventDefault(); run((token) => applyVoucherAction(checkout.order.id, voucherCode, token)); }}>
+            <TextField name="voucher" label="Voucher code" value={voucherCode} error={notice?.ok === false ? notice.errors?.code : undefined} onChange={setVoucherCode} />
+            <div className="flex shrink-0 items-end gap-2"><Button type="submit" loading={pending}>Apply</Button>{checkout.order.promotionCode && <Button variant="secondary" loading={pending} onClick={() => run((token) => removeVoucherAction(checkout.order.id, token))}>Remove {checkout.order.promotionCode}</Button>}</div>
+          </form>
+          {checkout.order.promotionCode && <p className="mt-3 text-sm text-muted-foreground">Applied: {checkout.order.promotionCode}. The total shown is the server-calculated preview.</p>}
+        </Card>
       </div>
-      <aside className="space-y-4 lg:sticky lg:top-4"><Card title="Draft order"><dl className="space-y-2 text-sm"><div className="flex justify-between gap-3"><dt>Items</dt><dd>{checkout.order.lines.length}</dd></div><div className="flex justify-between gap-3"><dt>Subtotal</dt><dd className="tabular-nums">{formatMoney(checkout.order.subtotal)}</dd></div>{checkout.order.shippingFee && <div className="flex justify-between gap-3"><dt>Shipping</dt><dd className="tabular-nums">{formatMoney(checkout.order.shippingFee)}</dd></div>}{checkout.order.discount && <div className="flex justify-between gap-3"><dt>Discount</dt><dd className="tabular-nums">−{formatMoney(checkout.order.discount)}</dd></div>}<div className="flex justify-between gap-3 border-t border-border pt-3 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatMoney(checkout.order.total)}</dd></div></dl>{checkout.blockers?.length ? <p className="mt-4 text-sm text-muted-foreground">Complete the remaining checkout details to review your order.</p> : null}</Card></aside>
+      <aside className="space-y-4 lg:sticky lg:top-4"><Card title="Draft order"><dl className="space-y-2 text-sm"><div className="flex justify-between gap-3"><dt>Items</dt><dd>{checkout.order.lines.length}</dd></div><div className="flex justify-between gap-3"><dt>Subtotal</dt><dd className="tabular-nums">{formatMoney(checkout.order.subtotal)}</dd></div>{checkout.order.shippingFee && <div className="flex justify-between gap-3"><dt>Shipping</dt><dd className="tabular-nums">{formatMoney(checkout.order.shippingFee)}</dd></div>}{checkout.order.discount && <div className="flex justify-between gap-3"><dt>Discount</dt><dd className="tabular-nums">−{formatMoney(checkout.order.discount)}</dd></div>}<div className="flex justify-between gap-3 border-t border-border pt-3 text-base font-semibold"><dt>Total</dt><dd className="tabular-nums">{formatMoney(checkout.order.total)}</dd></div></dl>{checkout.ready ? <Link href="/checkout/review" className="mt-4 inline-flex min-h-control items-center rounded-control bg-primary px-4 text-sm font-medium text-primary-foreground">Review order</Link> : <p className="mt-4 text-sm text-muted-foreground">Complete the remaining checkout details to review your order.</p>}</Card></aside>
     </div>
   );
 }

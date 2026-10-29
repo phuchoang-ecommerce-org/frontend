@@ -7,8 +7,10 @@ vi.mock("./backend", () => ({ backendRequest }));
 
 import {
   initiateCheckout,
+  getOrderSummary,
   parseCheckout,
   parseOrderSummary,
+  removeCheckoutVoucher,
   setCheckoutShippingAddress,
 } from "./ordering";
 
@@ -78,5 +80,26 @@ describe("checkout API boundary", () => {
 
   it("rejects a review response without its confirmation token", () => {
     expect(() => parseOrderSummary({ order: checkout.order, changed: false })).toThrow();
+  });
+
+  it("gets a fresh, authenticated review summary", async () => {
+    const summary = { order: checkout.order, changed: true, changes: [{ field: "shippingFee", previous: "5000.0000", current: "7000.0000" }], confirmationToken: "opaque-token" };
+    backendRequest.mockResolvedValueOnce(new Response(JSON.stringify(summary)));
+
+    await expect(getOrderSummary("access-token", "checkout/1")).resolves.toEqual(summary);
+    expect(backendRequest).toHaveBeenCalledWith(
+      "/checkouts/checkout%2F1/summary",
+      { headers: { Authorization: "Bearer access-token" }, cache: "no-store" },
+    );
+  });
+
+  it("removes a voucher with an uncached authenticated request", async () => {
+    backendRequest.mockResolvedValueOnce(new Response(null, { status: 204 }));
+
+    await expect(removeCheckoutVoucher("access-token", "checkout/1")).resolves.toMatchObject({ status: 204 });
+    expect(backendRequest).toHaveBeenCalledWith(
+      "/checkouts/checkout%2F1/voucher",
+      { method: "DELETE", headers: { Authorization: "Bearer access-token" }, cache: "no-store" },
+    );
   });
 });

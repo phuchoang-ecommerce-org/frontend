@@ -5,6 +5,7 @@ import { z } from "zod";
 import {
   applyCheckoutVoucher,
   initiateCheckout,
+  removeCheckoutVoucher,
   selectCheckoutShippingOption,
   setCheckoutBillingInformation,
   setCheckoutShippingAddress,
@@ -121,4 +122,13 @@ export async function applyVoucherAction(checkoutId: string, code: string, csrfT
   if (!parsed.success) return invalid(parsed.error);
   const accessToken = await authorised(csrfToken);
   return typeof accessToken === "string" ? result(() => applyCheckoutVoucher(accessToken, parsed.data.checkoutId, { code: parsed.data.code })) : accessToken;
+}
+
+export async function removeVoucherAction(checkoutId: string, csrfToken: string): Promise<CheckoutActionResult> {
+  if (!id.safeParse(checkoutId).success) return { ok: false, message: "The checkout draft is unavailable." };
+  const accessToken = await authorised(csrfToken);
+  return typeof accessToken === "string" ? result(async () => {
+    const response = await removeCheckoutVoucher(accessToken, checkoutId);
+    if (!response.ok) throw response;
+  }) : accessToken;
 }
