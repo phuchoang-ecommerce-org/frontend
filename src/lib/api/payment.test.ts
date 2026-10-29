@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}));
 const backendRequest = vi.hoisted(() => vi.fn());
 vi.mock("./backend", () => ({ backendRequest }));
 
-import { listEligiblePaymentMethods, parsePaymentMethods } from "./payment";
+import { getOrderPayment, listEligiblePaymentMethods, parsePayment, parsePaymentMethods } from "./payment";
 
 describe("payment API boundary", () => {
   afterEach(() => vi.clearAllMocks());
@@ -32,5 +32,26 @@ describe("payment API boundary", () => {
 
   it("rejects a malformed payment-method response", () => {
     expect(() => parsePaymentMethods([{ type: "CARD" }])).toThrow();
+  });
+
+  it("loads an uncached payment separately from the order snapshot", async () => {
+    const payment = {
+      id: "payment-1",
+      orderId: "order/1",
+      method: "CARD",
+      currency: "VND",
+      status: "PENDING",
+    };
+    backendRequest.mockResolvedValueOnce(new Response(JSON.stringify(payment)));
+
+    await expect(getOrderPayment("access-token", "order/1")).resolves.toEqual(payment);
+    expect(backendRequest).toHaveBeenCalledWith("/orders/order%2F1/payment", {
+      headers: { Authorization: "Bearer access-token" },
+      cache: "no-store",
+    });
+  });
+
+  it("rejects a malformed payment response", () => {
+    expect(() => parsePayment({ id: "payment-1", orderId: "order-1", method: "CARD" })).toThrow();
   });
 });

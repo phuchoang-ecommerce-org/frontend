@@ -8,6 +8,10 @@ export type Checkout = components["schemas"]["Checkout"];
 export type OrderSummary = components["schemas"]["OrderSummary"];
 export type Order = components["schemas"]["Order"];
 export type OrderPage = components["schemas"]["OrderPage"];
+export type OrderPageResult = {
+  items: Order[];
+  page: { size: number; next?: string | null; total?: number };
+};
 export type PlaceOrderRequest = components["schemas"]["PlaceOrderRequest"];
 export type ShippingAddressSelection =
   components["schemas"]["ShippingAddressSelection"];
@@ -277,7 +281,7 @@ export async function getOrder(accessToken: string, orderId: string): Promise<Or
 export async function listOrders(
   accessToken: string,
   cursor?: string,
-): Promise<OrderPage> {
+): Promise<OrderPageResult> {
   const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
   const pageSchema = z.object({
     items: z.array(orderSchema).optional(),
@@ -289,7 +293,7 @@ export async function listOrders(
       cache: "no-store",
     }),
     pageSchema,
-  ) as Promise<OrderPage>;
+  ) as Promise<OrderPageResult>;
 }
 
 async function writeCheckout(

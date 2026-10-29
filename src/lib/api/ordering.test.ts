@@ -7,7 +7,9 @@ vi.mock("./backend", () => ({ backendRequest }));
 
 import {
   initiateCheckout,
+  getOrder,
   getOrderSummary,
+  listOrders,
   placeOrder,
   parseCheckout,
   parseOrderSummary,
@@ -123,6 +125,27 @@ describe("checkout API boundary", () => {
         "Idempotency-Key": "attempt-key",
       },
       body: JSON.stringify({ checkoutId: "checkout/1", confirmationToken: "review-token" }),
+      cache: "no-store",
+    });
+  });
+
+  it("loads one immutable order snapshot without caching", async () => {
+    backendRequest.mockResolvedValueOnce(new Response(JSON.stringify(checkout.order)));
+
+    await expect(getOrder("access-token", "order/1")).resolves.toEqual(checkout.order);
+    expect(backendRequest).toHaveBeenCalledWith("/orders/order%2F1", {
+      headers: { Authorization: "Bearer access-token" },
+      cache: "no-store",
+    });
+  });
+
+  it("loads a cursor page of immutable order snapshots", async () => {
+    const orderPage = { items: [checkout.order], page: { size: 1, next: "opaque-cursor" } };
+    backendRequest.mockResolvedValueOnce(new Response(JSON.stringify(orderPage)));
+
+    await expect(listOrders("access-token", "previous cursor")).resolves.toEqual(orderPage);
+    expect(backendRequest).toHaveBeenCalledWith("/orders?cursor=previous%20cursor", {
+      headers: { Authorization: "Bearer access-token" },
       cache: "no-store",
     });
   });

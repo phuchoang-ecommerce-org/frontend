@@ -21,7 +21,7 @@ const storeLinks = [
 
 export default async function AccountLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
-  if (!session) redirect("/login?returnTo=%2Faccount%2Faddresses");
+  if (!session) redirect("/login?returnTo=%2Faccount%2Forders");
   let cartCount = 0;
   try {
     const cart = await getCurrentCart();
@@ -41,6 +41,9 @@ export default async function AccountLayout({ children }: { children: ReactNode 
         <nav aria-label="Account" className="mx-auto flex max-w-content flex-wrap items-center gap-2 px-3 py-2 sm:px-4 lg:px-6">
           <Link href="/account/addresses" className={`inline-flex min-h-control items-center rounded-control px-2 text-sm font-medium text-primary ${focusRing}`}>
             Addresses
+          </Link>
+          <Link href="/account/orders" className={`inline-flex min-h-control items-center rounded-control px-2 text-sm font-medium text-primary ${focusRing}`}>
+            Orders
           </Link>
           <span className="ms-auto"><AccountSignOutButton onSignOut={logoutAction} /></span>
         </nav>
