@@ -6,7 +6,15 @@ import type { BackendSession } from "@/lib/api/identity";
 
 export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
-export type StoredSession = BackendSession & { expiresAt: number };
+export type CheckoutAttempt = {
+  confirmationToken: string;
+  idempotencyKey: string;
+};
+
+export type StoredSession = BackendSession & {
+  expiresAt: number;
+  checkoutAttempts?: Record<string, CheckoutAttempt>;
+};
 
 type SessionStore = {
   get(id: string): Promise<StoredSession | null>;

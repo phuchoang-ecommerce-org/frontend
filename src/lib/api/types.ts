@@ -3995,6 +3995,8 @@ export interface components {
             items?: components["schemas"]["Order"][];
         };
         PlaceOrderRequest: {
+            /** @description The Draft checkout being confirmed. The backend checks that it belongs to the caller. */
+            checkoutId: components["schemas"]["Id"];
             /** @description The token from the order summary the customer confirmed. */
             confirmationToken: string;
         };

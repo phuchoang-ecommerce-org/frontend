@@ -45,6 +45,10 @@ const problemMessages: Readonly<Record<string, string>> = {
   "ECP-GEN-5000": "The service could not complete the request. Try again.",
   "ECP-GEN-5030": "The service is temporarily unavailable. Try again shortly.",
   "ECP-CRT-4090": "Stock changed. Choose a lower quantity and try again.",
+  "ECP-INV-4091": "Some items are no longer available in the requested quantity. Update your cart and review the order again.",
+  "ECP-PRM-4090": "This voucher is no longer available. Review the updated order before placing it.",
+  "ECP-ORD-4090": "This order confirmation belongs to a different request. Reload the review and try again.",
+  "ECP-ORD-4091": "The order review is no longer current. Review the latest total before placing it.",
 };
 
 const fieldErrorMessages: Readonly<Record<string, string>> = {

@@ -4,7 +4,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import {
   applyCheckoutVoucher,
+  getCurrentCheckout,
   initiateCheckout,
+  placeOrder,
   removeCheckoutVoucher,
   selectCheckoutShippingOption,
   setCheckoutBillingInformation,
@@ -13,11 +15,12 @@ import {
 import { selectCheckoutPaymentMethod } from "@/lib/api/payment";
 import { fieldErrors, problemMessage, readProblem } from "@/lib/api/backend";
 import { getSession } from "@/lib/session";
+import { checkoutAttempt, clearCheckoutAttempt } from "@/lib/session";
 import { checkActionCsrf } from "@/lib/session/csrf";
 
 export type CheckoutActionResult =
-  | { ok: true; message?: string }
-  | { ok: false; message: string; errors?: Record<string, string> };
+  | { ok: true; message?: string; orderId?: string }
+  | { ok: false; message: string; errors?: Record<string, string>; recovery?: "cart" | "review" };
 
 const id = z.string().min(1);
 const address = z.object({
@@ -131,4 +134,70 @@ export async function removeVoucherAction(checkoutId: string, csrfToken: string)
     const response = await removeCheckoutVoucher(accessToken, checkoutId);
     if (!response.ok) throw response;
   }) : accessToken;
+}
+
+export async function placeOrderAction(
+  checkoutId: string,
+  confirmationToken: string,
+  csrfToken: string,
+): Promise<CheckoutActionResult> {
+  if (!id.safeParse(checkoutId).success || !z.string().min(1).safeParse(confirmationToken).success) {
+    return { ok: false, message: "This review is no longer available. Return to checkout and review it again.", recovery: "review" };
+  }
+  const accessToken = await authorised(csrfToken);
+  if (typeof accessToken !== "string") return accessToken;
+  const idempotencyKey = await checkoutAttempt(checkoutId, confirmationToken);
+  if (!idempotencyKey) return { ok: false, message: "Your session ended. Sign in and try again." };
+
+  const request = () => placeOrder(accessToken, { checkoutId, confirmationToken }, idempotencyKey);
+  try {
+    const order = await request();
+    await clearCheckoutAttempt(checkoutId);
+    revalidatePath("/cart");
+    revalidatePath("/checkout");
+    return { ok: true, message: "Your order was placed.", orderId: order.id };
+  } catch (error) {
+    if (!(error instanceof Response)) {
+      // Do not infer failure from an interrupted connection. Read the checkout
+      // state before retrying the exact request with the exact same key.
+      try {
+        await getCurrentCheckout(accessToken);
+        const order = await request();
+        await clearCheckoutAttempt(checkoutId);
+        revalidatePath("/cart");
+        revalidatePath("/checkout");
+        return { ok: true, message: "Your order was confirmed after reconnecting.", orderId: order.id };
+      } catch (recoveryError) {
+        if (recoveryError instanceof Response) {
+          const problem = await readProblem(recoveryError);
+          if (problem.status === 404) {
+            // The checkout no longer exists; the replay remains safe because
+            // the idempotency key and body are unchanged.
+            try {
+              const order = await request();
+              await clearCheckoutAttempt(checkoutId);
+              return { ok: true, message: "Your order was confirmed after reconnecting.", orderId: order.id };
+            } catch (replayError) {
+              if (replayError instanceof Response) return placementProblem(replayError);
+            }
+          }
+          return placementProblem(recoveryError);
+        }
+        return { ok: false, message: "We could not confirm the order status. Please try again; your confirmation will be reused safely." };
+      }
+    }
+    return placementProblem(error);
+  }
+}
+
+async function placementProblem(response: Response): Promise<CheckoutActionResult> {
+  const problem = await readProblem(response);
+  const recovery = problem.code === "ECP-INV-4091" ? "cart" :
+    ["ECP-PRM-4090", "ECP-ORD-4091"].includes(problem.code) ? "review" : undefined;
+  return {
+    ok: false,
+    message: problemMessage(problem, "We could not place the order. Try again shortly."),
+    errors: fieldErrors(problem),
+    ...(recovery ? { recovery } : {}),
+  };
 }

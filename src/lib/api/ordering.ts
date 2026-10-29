@@ -6,6 +6,9 @@ import type { components } from "./types";
 
 export type Checkout = components["schemas"]["Checkout"];
 export type OrderSummary = components["schemas"]["OrderSummary"];
+export type Order = components["schemas"]["Order"];
+export type OrderPage = components["schemas"]["OrderPage"];
+export type PlaceOrderRequest = components["schemas"]["PlaceOrderRequest"];
 export type ShippingAddressSelection =
   components["schemas"]["ShippingAddressSelection"];
 export type BillingInformation = components["schemas"]["BillingInformation"];
@@ -107,6 +110,7 @@ const orderSummarySchema = z.object({
 
 type ApiCheckout = z.infer<typeof checkoutSchema>;
 type ApiOrderSummary = z.infer<typeof orderSummarySchema>;
+type ApiOrder = z.infer<typeof orderSchema>;
 type CheckoutContractCompatibility = Checkout extends ApiCheckout
   ? OrderSummary extends ApiOrderSummary
     ? true
@@ -114,6 +118,9 @@ type CheckoutContractCompatibility = Checkout extends ApiCheckout
   : never;
 const checkoutContractCompatibility: CheckoutContractCompatibility = true;
 void checkoutContractCompatibility;
+
+const orderContractCompatibility: Order extends ApiOrder ? true : never = true;
+void orderContractCompatibility;
 
 function bearer(accessToken: string): HeadersInit {
   return { Authorization: `Bearer ${accessToken}` };
@@ -133,6 +140,10 @@ export function parseCheckout(value: unknown): Checkout {
 
 export function parseOrderSummary(value: unknown): OrderSummary {
   return orderSummarySchema.parse(value) as OrderSummary;
+}
+
+export function parseOrder(value: unknown): Order {
+  return orderSchema.parse(value) as Order;
 }
 
 export async function initiateCheckout(accessToken: string): Promise<Checkout> {
@@ -231,6 +242,54 @@ export async function getOrderSummary(
     ),
     orderSummarySchema,
   ) as Promise<OrderSummary>;
+}
+
+/** The backend binds placement to the reviewed Draft checkout. */
+export async function placeOrder(
+  accessToken: string,
+  input: PlaceOrderRequest,
+  idempotencyKey: string,
+): Promise<Order> {
+  return checkoutJson(
+    await backendRequest("/orders", {
+      method: "POST",
+      headers: {
+        ...bearer(accessToken),
+        "Idempotency-Key": idempotencyKey,
+      },
+      body: JSON.stringify(input),
+      cache: "no-store",
+    }),
+    orderSchema,
+  ) as Promise<Order>;
+}
+
+export async function getOrder(accessToken: string, orderId: string): Promise<Order> {
+  return checkoutJson(
+    await backendRequest(`/orders/${encodeURIComponent(orderId)}`, {
+      headers: bearer(accessToken),
+      cache: "no-store",
+    }),
+    orderSchema,
+  ) as Promise<Order>;
+}
+
+export async function listOrders(
+  accessToken: string,
+  cursor?: string,
+): Promise<OrderPage> {
+  const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : "";
+  const pageSchema = z.object({
+    items: z.array(orderSchema).optional(),
+    page: z.object({ next: z.string().nullable().optional() }).passthrough(),
+  }).passthrough();
+  return checkoutJson(
+    await backendRequest(`/orders${query}`, {
+      headers: bearer(accessToken),
+      cache: "no-store",
+    }),
+    pageSchema,
+  ) as Promise<OrderPage>;
 }
 
 async function writeCheckout(

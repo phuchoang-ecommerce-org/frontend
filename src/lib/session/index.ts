@@ -117,4 +117,44 @@ export async function clearSession(): Promise<StoredSession | null> {
   return session;
 }
 
+/**
+ * One reviewed checkout/token pair owns one placement key for the lifetime of
+ * the authenticated session. Keeping this server-side survives a tab reload
+ * without exposing the key as browser state.
+ */
+export async function checkoutAttempt(
+  checkoutId: string,
+  confirmationToken: string,
+): Promise<string | null> {
+  const id = (await cookies()).get(COOKIE_NAME)?.value;
+  if (!id) return null;
+  const store = sessionStore();
+  const session = await store.get(id);
+  if (!session) return null;
+  const current = session.checkoutAttempts?.[checkoutId];
+  if (current?.confirmationToken === confirmationToken) {
+    return current.idempotencyKey;
+  }
+  const idempotencyKey = randomBytes(32).toString("base64url");
+  await store.set(id, {
+    ...session,
+    checkoutAttempts: {
+      ...session.checkoutAttempts,
+      [checkoutId]: { confirmationToken, idempotencyKey },
+    },
+  });
+  return idempotencyKey;
+}
+
+export async function clearCheckoutAttempt(checkoutId: string): Promise<void> {
+  const id = (await cookies()).get(COOKIE_NAME)?.value;
+  if (!id) return;
+  const store = sessionStore();
+  const session = await store.get(id);
+  if (!session?.checkoutAttempts?.[checkoutId]) return;
+  const checkoutAttempts = { ...session.checkoutAttempts };
+  delete checkoutAttempts[checkoutId];
+  await store.set(id, { ...session, checkoutAttempts });
+}
+
 export type { StoredSession } from "./store";

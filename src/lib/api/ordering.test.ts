@@ -8,6 +8,7 @@ vi.mock("./backend", () => ({ backendRequest }));
 import {
   initiateCheckout,
   getOrderSummary,
+  placeOrder,
   parseCheckout,
   parseOrderSummary,
   removeCheckoutVoucher,
@@ -101,5 +102,28 @@ describe("checkout API boundary", () => {
       "/checkouts/checkout%2F1/voucher",
       { method: "DELETE", headers: { Authorization: "Bearer access-token" }, cache: "no-store" },
     );
+  });
+
+  it("places a reviewed checkout with its stable idempotency key", async () => {
+    backendRequest.mockResolvedValueOnce(
+      new Response(JSON.stringify(checkout.order), { status: 201 }),
+    );
+
+    await expect(
+      placeOrder(
+        "access-token",
+        { checkoutId: "checkout/1", confirmationToken: "review-token" },
+        "attempt-key",
+      ),
+    ).resolves.toEqual(checkout.order);
+    expect(backendRequest).toHaveBeenCalledWith("/orders", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer access-token",
+        "Idempotency-Key": "attempt-key",
+      },
+      body: JSON.stringify({ checkoutId: "checkout/1", confirmationToken: "review-token" }),
+      cache: "no-store",
+    });
   });
 });
