@@ -43,11 +43,7 @@ export function cursorPaginationHrefs(
   return {
     ...(page.cursor
       ? {
-          previousHref: cursorHref(
-            basePath,
-            previousCursor,
-            previousTrail,
-          ),
+          previousHref: cursorHref(basePath, previousCursor, previousTrail),
         }
       : {}),
     ...(nextCursor

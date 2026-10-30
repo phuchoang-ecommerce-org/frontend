@@ -79,7 +79,9 @@ export function CartLine({
           Remove
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground">Set quantity to 0 to remove this item.</p>
+      <p className="text-xs text-muted-foreground">
+        Set quantity to 0 to remove this item.
+      </p>
       {(error || editor.error) && (
         <StatusMessage kind="error" message={error || editor.error} />
       )}

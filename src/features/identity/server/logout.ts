@@ -14,7 +14,9 @@ function csrfFailure(): FormResult {
 
 function reportBackendInvalidationFailure(scope: "current" | "all"): void {
   // Keep tokens and session identifiers out of operational logs.
-  console.error(`Backend ${scope}-session invalidation failed after local sign-out`);
+  console.error(
+    `Backend ${scope}-session invalidation failed after local sign-out`,
+  );
 }
 
 export async function logoutAction(csrfToken: string): Promise<FormResult> {

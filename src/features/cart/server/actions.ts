@@ -3,11 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import {
-  backendRequest,
-  problemMessage,
-  readProblem,
-} from "@/lib/api/backend";
+import { backendRequest, problemMessage, readProblem } from "@/lib/api/backend";
 import { checkActionCsrf } from "@/lib/session/csrf";
 import { getSession } from "@/lib/session";
 import type { CartChangeResult } from "../types";
@@ -84,7 +80,6 @@ export async function addToCartAction(
     return failed("Your cart could not be updated. Try again.");
   }
 }
-
 
 export async function changeCartQuantityAction(
   cartId: string,

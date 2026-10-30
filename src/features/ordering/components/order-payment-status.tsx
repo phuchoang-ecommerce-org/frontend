@@ -28,16 +28,33 @@ export async function OrderPaymentStatus({
   }
 
   if (unavailable) {
-    return <StatusMessage kind="info" title="Payment details unavailable" message="Your order is still available. Check back shortly for payment updates." />;
+    return (
+      <StatusMessage
+        kind="info"
+        title="Payment details unavailable"
+        message="Your order is still available. Check back shortly for payment updates."
+      />
+    );
   }
   if (!payment) return null;
   const amount = payment.capturedAmount ?? payment.authorisedAmount;
   return (
     <Card title="Payment">
       <dl className="space-y-2 text-sm">
-        <div className="flex justify-between gap-3"><dt>Status</dt><dd className="font-medium">{paymentLabel(payment.status)}</dd></div>
-        <div className="flex justify-between gap-3"><dt>Method</dt><dd>{payment.method.replaceAll("_", " ")}</dd></div>
-        {amount && <div className="flex justify-between gap-3"><dt>Amount</dt><dd className="tabular-nums">{formatMoney(amount)}</dd></div>}
+        <div className="flex justify-between gap-3">
+          <dt>Status</dt>
+          <dd className="font-medium">{paymentLabel(payment.status)}</dd>
+        </div>
+        <div className="flex justify-between gap-3">
+          <dt>Method</dt>
+          <dd>{payment.method.replaceAll("_", " ")}</dd>
+        </div>
+        {amount && (
+          <div className="flex justify-between gap-3">
+            <dt>Amount</dt>
+            <dd className="tabular-nums">{formatMoney(amount)}</dd>
+          </div>
+        )}
       </dl>
     </Card>
   );

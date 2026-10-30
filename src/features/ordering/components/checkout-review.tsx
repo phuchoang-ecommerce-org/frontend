@@ -10,19 +10,246 @@ import { csrfToken } from "@/lib/session/client-csrf";
 import { placeOrderAction, type CheckoutActionResult } from "../server/actions";
 
 function address(value: Checkout["order"]["shippingAddress"]) {
-  return value ? [value.recipientName, value.line1, value.line2, value.city, value.region, value.postalCode, value.countryCode].filter(Boolean).join(", ") : "Not provided";
+  return value
+    ? [
+        value.recipientName,
+        value.line1,
+        value.line2,
+        value.city,
+        value.region,
+        value.postalCode,
+        value.countryCode,
+      ]
+        .filter(Boolean)
+        .join(", ")
+    : "Not provided";
 }
 
-export function CheckoutReview({ checkout, summary }: { checkout: Checkout; summary: OrderSummary }) {
+export function CheckoutReview({
+  checkout,
+  summary,
+}: {
+  checkout: Checkout;
+  summary: OrderSummary;
+}) {
   const router = useRouter();
   const [acknowledged, setAcknowledged] = useState(!summary.changed);
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<CheckoutActionResult | null>(null);
-  const shipping = checkout.shippingOptions?.find((item) => item.id === checkout.selectedShippingOptionId);
-  return <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]"><div className="space-y-5">
-    {summary.changed && <StatusMessage kind="info" title="Your order changed" message="Review every change below before continuing. A new confirmation is required for these server-calculated values." />}
-    {summary.changed && <Card title="Changes since you started checkout"><ul className="space-y-3">{summary.changes?.length ? summary.changes.map((change, index) => <li key={`${change.field}-${index}`} className="border-l-2 border-primary pl-3"><p className="font-medium">{change.field}</p><p className="text-sm text-muted-foreground">{change.previous ?? "No previous value"} → {change.current ?? "No current value"}</p></li>) : <li className="text-sm text-muted-foreground">The total was refreshed. Review the current values below.</li>}</ul></Card>}
-    <Card title="Items"><ul className="space-y-3">{summary.order.lines.map((line) => <li key={line.id} className="flex justify-between gap-4 border-b border-border pb-3 last:border-0"><span><strong>{line.productName}</strong>{line.variantName && <span className="block text-sm text-muted-foreground">{line.variantName}</span>}<span className="block text-sm text-muted-foreground">{line.quantity} × {formatMoney(line.unitPriceAtOrder)}</span></span><span className="tabular-nums">{formatMoney(line.lineTotal)}</span></li>)}</ul></Card>
-    <Card title="Delivery and payment"><dl className="space-y-3 text-sm"><div><dt className="font-medium">Delivery address</dt><dd className="mt-1 text-muted-foreground">{address(summary.order.shippingAddress)}</dd></div><div><dt className="font-medium">Delivery method</dt><dd className="mt-1 text-muted-foreground">{shipping ? [shipping.carrier, shipping.serviceName].filter(Boolean).join(" — ") : "Not selected"}</dd>{shipping?.estimatedDeliveryFrom && shipping.estimatedDeliveryTo && <dd className="text-muted-foreground">Estimated {new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(shipping.estimatedDeliveryFrom))}–{new Intl.DateTimeFormat("en", { dateStyle: "medium" }).format(new Date(shipping.estimatedDeliveryTo))}</dd>}</div><div><dt className="font-medium">Payment method</dt><dd className="mt-1 text-muted-foreground">{checkout.paymentMethod?.displayName || checkout.paymentMethod?.type || "Not selected"}{checkout.paymentMethod?.type === "CASH_ON_DELIVERY" ? " — collected on delivery." : ""}</dd></div></dl></Card>
-  </div><aside className="space-y-4 lg:sticky lg:top-4"><Card title="Review total"><dl className="space-y-2 text-sm"><div className="flex justify-between"><dt>Subtotal</dt><dd>{formatMoney(summary.order.subtotal)}</dd></div>{summary.order.discount && <div className="flex justify-between"><dt>Discount</dt><dd>−{formatMoney(summary.order.discount)}</dd></div>}{summary.order.shippingFee && <div className="flex justify-between"><dt>Shipping</dt><dd>{formatMoney(summary.order.shippingFee)}</dd></div>}<div className="flex justify-between border-t border-border pt-3 text-base font-semibold"><dt>Total</dt><dd>{formatMoney(summary.order.total)}</dd></div></dl><label className="mt-5 flex gap-2 text-sm"><input type="checkbox" checked={acknowledged} onChange={(event) => setAcknowledged(event.target.checked)} className="mt-1 accent-primary" />I have reviewed the current price, stock, voucher, and delivery total.</label>{result && <StatusMessage className="mt-4" kind={result.ok ? "success" : "error"} title={result.ok ? "Order confirmed" : "Order not placed"} message={result.message ?? "Your order was placed."} />}{result?.ok ? <div className="mt-4 space-y-3"><p className="text-sm text-muted-foreground">Your order snapshot is ready.</p>{result.orderId && <Link href={`/account/orders/${encodeURIComponent(result.orderId)}`} className="inline-flex min-h-control items-center rounded-control bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">View order</Link>}</div> : <div className="mt-4"><Button loading={pending} disabled={!acknowledged} onClick={async () => { setPending(true); setResult(null); try { const next = await placeOrderAction(checkout.order.id, summary.confirmationToken, await csrfToken()); setResult(next); if (next.ok && next.orderId) router.push(`/account/orders/${encodeURIComponent(next.orderId)}`); if (!next.ok && next.recovery) router.push(next.recovery === "cart" ? "/cart" : "/checkout/review"); } catch { setResult({ ok: false, message: "We could not start order placement. Try again; your confirmation is still protected." }); } finally { setPending(false); } }}>Place order</Button></div>}<p className="mt-3 text-sm text-muted-foreground">{acknowledged ? "Your confirmation uses one protected attempt, even if you reload or reconnect." : "Confirm that you reviewed the current figures to place the order."}</p><Link href="/checkout" className="mt-4 inline-block text-sm font-medium underline underline-offset-4">Edit checkout</Link></Card></aside></div>;
+  const shipping = checkout.shippingOptions?.find(
+    (item) => item.id === checkout.selectedShippingOptionId,
+  );
+  return (
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="space-y-5">
+        {summary.changed && (
+          <StatusMessage
+            kind="info"
+            title="Your order changed"
+            message="Review every change below before continuing. A new confirmation is required for these server-calculated values."
+          />
+        )}
+        {summary.changed && (
+          <Card title="Changes since you started checkout">
+            <ul className="space-y-3">
+              {summary.changes?.length ? (
+                summary.changes.map((change, index) => (
+                  <li
+                    key={`${change.field}-${index}`}
+                    className="border-l-2 border-primary pl-3"
+                  >
+                    <p className="font-medium">{change.field}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {change.previous ?? "No previous value"} →{" "}
+                      {change.current ?? "No current value"}
+                    </p>
+                  </li>
+                ))
+              ) : (
+                <li className="text-sm text-muted-foreground">
+                  The total was refreshed. Review the current values below.
+                </li>
+              )}
+            </ul>
+          </Card>
+        )}
+        <Card title="Items">
+          <ul className="space-y-3">
+            {summary.order.lines.map((line) => (
+              <li
+                key={line.id}
+                className="flex justify-between gap-4 border-b border-border pb-3 last:border-0"
+              >
+                <span>
+                  <strong>{line.productName}</strong>
+                  {line.variantName && (
+                    <span className="block text-sm text-muted-foreground">
+                      {line.variantName}
+                    </span>
+                  )}
+                  <span className="block text-sm text-muted-foreground">
+                    {line.quantity} × {formatMoney(line.unitPriceAtOrder)}
+                  </span>
+                </span>
+                <span className="tabular-nums">
+                  {formatMoney(line.lineTotal)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Card>
+        <Card title="Delivery and payment">
+          <dl className="space-y-3 text-sm">
+            <div>
+              <dt className="font-medium">Delivery address</dt>
+              <dd className="mt-1 text-muted-foreground">
+                {address(summary.order.shippingAddress)}
+              </dd>
+            </div>
+            <div>
+              <dt className="font-medium">Delivery method</dt>
+              <dd className="mt-1 text-muted-foreground">
+                {shipping
+                  ? [shipping.carrier, shipping.serviceName]
+                      .filter(Boolean)
+                      .join(" — ")
+                  : "Not selected"}
+              </dd>
+              {shipping?.estimatedDeliveryFrom &&
+                shipping.estimatedDeliveryTo && (
+                  <dd className="text-muted-foreground">
+                    Estimated{" "}
+                    {new Intl.DateTimeFormat("en", {
+                      dateStyle: "medium",
+                    }).format(new Date(shipping.estimatedDeliveryFrom))}
+                    –
+                    {new Intl.DateTimeFormat("en", {
+                      dateStyle: "medium",
+                    }).format(new Date(shipping.estimatedDeliveryTo))}
+                  </dd>
+                )}
+            </div>
+            <div>
+              <dt className="font-medium">Payment method</dt>
+              <dd className="mt-1 text-muted-foreground">
+                {checkout.paymentMethod?.displayName ||
+                  checkout.paymentMethod?.type ||
+                  "Not selected"}
+                {checkout.paymentMethod?.type === "CASH_ON_DELIVERY"
+                  ? " — collected on delivery."
+                  : ""}
+              </dd>
+            </div>
+          </dl>
+        </Card>
+      </div>
+      <aside className="space-y-4 lg:sticky lg:top-4">
+        <Card title="Review total">
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <dt>Subtotal</dt>
+              <dd>{formatMoney(summary.order.subtotal)}</dd>
+            </div>
+            {summary.order.discount && (
+              <div className="flex justify-between">
+                <dt>Discount</dt>
+                <dd>−{formatMoney(summary.order.discount)}</dd>
+              </div>
+            )}
+            {summary.order.shippingFee && (
+              <div className="flex justify-between">
+                <dt>Shipping</dt>
+                <dd>{formatMoney(summary.order.shippingFee)}</dd>
+              </div>
+            )}
+            <div className="flex justify-between border-t border-border pt-3 text-base font-semibold">
+              <dt>Total</dt>
+              <dd>{formatMoney(summary.order.total)}</dd>
+            </div>
+          </dl>
+          <label className="mt-5 flex gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={acknowledged}
+              onChange={(event) => setAcknowledged(event.target.checked)}
+              className="mt-1 accent-primary"
+            />
+            I have reviewed the current price, stock, voucher, and delivery
+            total.
+          </label>
+          {result && (
+            <StatusMessage
+              className="mt-4"
+              kind={result.ok ? "success" : "error"}
+              title={result.ok ? "Order confirmed" : "Order not placed"}
+              message={result.message ?? "Your order was placed."}
+            />
+          )}
+          {result?.ok ? (
+            <div className="mt-4 space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Your order snapshot is ready.
+              </p>
+              {result.orderId && (
+                <Link
+                  href={`/account/orders/${encodeURIComponent(result.orderId)}`}
+                  className="inline-flex min-h-control items-center rounded-control bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                >
+                  View order
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="mt-4">
+              <Button
+                loading={pending}
+                disabled={!acknowledged}
+                onClick={async () => {
+                  setPending(true);
+                  setResult(null);
+                  try {
+                    const next = await placeOrderAction(
+                      checkout.order.id,
+                      summary.confirmationToken,
+                      await csrfToken(),
+                    );
+                    setResult(next);
+                    if (next.ok && next.orderId)
+                      router.push(
+                        `/account/orders/${encodeURIComponent(next.orderId)}`,
+                      );
+                    if (!next.ok && next.recovery)
+                      router.push(
+                        next.recovery === "cart" ? "/cart" : "/checkout/review",
+                      );
+                  } catch {
+                    setResult({
+                      ok: false,
+                      message:
+                        "We could not start order placement. Try again; your confirmation is still protected.",
+                    });
+                  } finally {
+                    setPending(false);
+                  }
+                }}
+              >
+                Place order
+              </Button>
+            </div>
+          )}
+          <p className="mt-3 text-sm text-muted-foreground">
+            {acknowledged
+              ? "Your confirmation uses one protected attempt, even if you reload or reconnect."
+              : "Confirm that you reviewed the current figures to place the order."}
+          </p>
+          <Link
+            href="/checkout"
+            className="mt-4 inline-block text-sm font-medium underline underline-offset-4"
+          >
+            Edit checkout
+          </Link>
+        </Card>
+      </aside>
+    </div>
+  );
 }

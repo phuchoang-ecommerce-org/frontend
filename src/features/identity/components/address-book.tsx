@@ -2,7 +2,13 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { AlertDialog, Button, Dialog, StatusMessage, TextField } from "@/components/ui";
+import {
+  AlertDialog,
+  Button,
+  Dialog,
+  StatusMessage,
+  TextField,
+} from "@/components/ui";
 import { csrfToken } from "@/lib/session/client-csrf";
 import type { AddressData, AddressDraft, FormResult } from "../types";
 
@@ -38,9 +44,7 @@ function AddressEditor({
   onSave: (values: AddressDraft) => Promise<FormResult>;
 }) {
   const [values, setValues] = useState<AddressDraft>(() =>
-    address
-      ? draft(address)
-      : { ...emptyAddress, isDefaultShipping: isFirst },
+    address ? draft(address) : { ...emptyAddress, isDefaultShipping: isFirst },
   );
   const [result, setResult] = useState<FormResult | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -57,8 +61,12 @@ function AddressEditor({
     if (!next.ok) {
       requestAnimationFrame(() => {
         const target =
-          formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]') ??
-          formRef.current?.querySelector<HTMLElement>("[data-address-feedback]");
+          formRef.current?.querySelector<HTMLElement>(
+            '[aria-invalid="true"]',
+          ) ??
+          formRef.current?.querySelector<HTMLElement>(
+            "[data-address-feedback]",
+          );
         target?.focus();
       });
     }
@@ -72,19 +80,58 @@ function AddressEditor({
     type?: React.HTMLInputTypeAttribute;
     hint?: string;
   }> = [
-    { name: "label", label: "Address label", hint: "For example, Home or Office." },
-    { name: "recipientName", label: "Recipient name", required: true, autoComplete: "name" },
-    { name: "line1", label: "Address line 1", required: true, autoComplete: "address-line1" },
+    {
+      name: "label",
+      label: "Address label",
+      hint: "For example, Home or Office.",
+    },
+    {
+      name: "recipientName",
+      label: "Recipient name",
+      required: true,
+      autoComplete: "name",
+    },
+    {
+      name: "line1",
+      label: "Address line 1",
+      required: true,
+      autoComplete: "address-line1",
+    },
     { name: "line2", label: "Address line 2", autoComplete: "address-line2" },
-    { name: "city", label: "City", required: true, autoComplete: "address-level2" },
-    { name: "region", label: "State or region", autoComplete: "address-level1" },
-    { name: "postalCode", label: "Postal code", required: true, autoComplete: "postal-code" },
-    { name: "countryCode", label: "Country code", required: true, autoComplete: "country", hint: "Use the two-letter code, such as VN or US." },
+    {
+      name: "city",
+      label: "City",
+      required: true,
+      autoComplete: "address-level2",
+    },
+    {
+      name: "region",
+      label: "State or region",
+      autoComplete: "address-level1",
+    },
+    {
+      name: "postalCode",
+      label: "Postal code",
+      required: true,
+      autoComplete: "postal-code",
+    },
+    {
+      name: "countryCode",
+      label: "Country code",
+      required: true,
+      autoComplete: "country",
+      hint: "Use the two-letter code, such as VN or US.",
+    },
     { name: "phone", label: "Phone", type: "tel", autoComplete: "tel" },
   ];
 
   return (
-    <form ref={formRef} onSubmit={submit} className="space-y-4" aria-busy={pending}>
+    <form
+      ref={formRef}
+      onSubmit={submit}
+      className="space-y-4"
+      aria-busy={pending}
+    >
       {result && !result.ok && (
         <div data-address-feedback tabIndex={-1}>
           <StatusMessage kind="error" message={result.message} />
@@ -94,7 +141,11 @@ function AddressEditor({
         {fields.map((field) => (
           <div
             key={field.name}
-            className={field.name === "line1" || field.name === "line2" ? "sm:col-span-2" : undefined}
+            className={
+              field.name === "line1" || field.name === "line2"
+                ? "sm:col-span-2"
+                : undefined
+            }
           >
             <TextField
               name={field.name}
@@ -117,19 +168,29 @@ function AddressEditor({
           ["isDefaultShipping", "Use as my default shipping address"],
           ["isDefaultBilling", "Use as my default billing address"],
         ].map(([name, label]) => (
-          <label key={name} className="flex min-h-control items-center gap-3 text-sm">
+          <label
+            key={name}
+            className="flex min-h-control items-center gap-3 text-sm"
+          >
             <input
               type="checkbox"
               checked={values[name as "isDefaultShipping" | "isDefaultBilling"]}
               disabled={pending}
-              onChange={(event) => update(name as "isDefaultShipping" | "isDefaultBilling", event.target.checked)}
+              onChange={(event) =>
+                update(
+                  name as "isDefaultShipping" | "isDefaultBilling",
+                  event.target.checked,
+                )
+              }
               className="size-5 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             />
             {label}
           </label>
         ))}
       </fieldset>
-      <Button type="submit" loading={pending}>Save address</Button>
+      <Button type="submit" loading={pending}>
+        Save address
+      </Button>
     </form>
   );
 }
@@ -217,7 +278,8 @@ export function AddressBook({
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="max-w-2xl text-sm text-muted-foreground">
-          Saved addresses make checkout faster. Orders already placed keep their original delivery details.
+          Saved addresses make checkout faster. Orders already placed keep their
+          original delivery details.
         </p>
         <Button onClick={() => setEditing("new")}>Add address</Button>
       </div>
@@ -231,32 +293,71 @@ export function AddressBook({
       {addresses.length === 0 ? (
         <div className="rounded-card border border-dashed border-border p-6">
           <h2 className="font-semibold">No saved addresses</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Add one now so it is ready when you check out.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add one now so it is ready when you check out.
+          </p>
         </div>
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {addresses.map((address) => (
-            <li key={address.id} className="rounded-card border border-border bg-card p-5">
+            <li
+              key={address.id}
+              className="rounded-card border border-border bg-card p-5"
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h2 className="font-semibold">{address.label || address.recipientName}</h2>
-                  {address.isDefaultShipping && <p className="mt-1 text-sm font-medium text-primary">Default shipping</p>}
+                  <h2 className="font-semibold">
+                    {address.label || address.recipientName}
+                  </h2>
+                  {address.isDefaultShipping && (
+                    <p className="mt-1 text-sm font-medium text-primary">
+                      Default shipping
+                    </p>
+                  )}
                 </div>
               </div>
               <address className="mt-3 text-sm not-italic leading-6 text-muted-foreground">
-                <span className="block text-foreground">{address.recipientName}</span>
+                <span className="block text-foreground">
+                  {address.recipientName}
+                </span>
                 <span className="block">{address.line1}</span>
-                {address.line2 && <span className="block">{address.line2}</span>}
-                <span className="block">{[address.city, address.region, address.postalCode].filter(Boolean).join(", ")}</span>
+                {address.line2 && (
+                  <span className="block">{address.line2}</span>
+                )}
+                <span className="block">
+                  {[address.city, address.region, address.postalCode]
+                    .filter(Boolean)
+                    .join(", ")}
+                </span>
                 <span className="block">{address.countryCode}</span>
-                {address.phone && <span className="block">{address.phone}</span>}
+                {address.phone && (
+                  <span className="block">{address.phone}</span>
+                )}
               </address>
               <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
-                <Button variant="secondary" disabled={pending} onClick={() => setEditing(address)}>Edit</Button>
+                <Button
+                  variant="secondary"
+                  disabled={pending}
+                  onClick={() => setEditing(address)}
+                >
+                  Edit
+                </Button>
                 {!address.isDefaultShipping && (
-                  <Button variant="quiet" disabled={pending} onClick={() => void makeDefault(address)}>Make default</Button>
+                  <Button
+                    variant="quiet"
+                    disabled={pending}
+                    onClick={() => void makeDefault(address)}
+                  >
+                    Make default
+                  </Button>
                 )}
-                <Button variant="quiet" disabled={pending} onClick={() => setRemoving(address)}>Remove</Button>
+                <Button
+                  variant="quiet"
+                  disabled={pending}
+                  onClick={() => setRemoving(address)}
+                >
+                  Remove
+                </Button>
               </div>
             </li>
           ))}
@@ -264,17 +365,23 @@ export function AddressBook({
       )}
       <Dialog
         open={editing !== null}
-        title={editing === "new" ? "Add shipping address" : "Edit shipping address"}
+        title={
+          editing === "new" ? "Add shipping address" : "Edit shipping address"
+        }
         description="Required fields are marked with an asterisk."
         contentClassName="max-h-screen overflow-y-auto sm:max-w-2xl"
-        onOpenChange={(open) => { if (!open && !pending) setEditing(null); }}
+        onOpenChange={(open) => {
+          if (!open && !pending) setEditing(null);
+        }}
       >
         <AddressEditor
           key={editing === "new" ? "new" : editing?.id}
           address={editing === "new" ? null : editing}
           isFirst={addresses.length === 0}
           pending={pending}
-          onSave={(values) => save(editing === "new" ? null : editing?.id ?? null, values)}
+          onSave={(values) =>
+            save(editing === "new" ? null : (editing?.id ?? null), values)
+          }
         />
       </Dialog>
       <AlertDialog

@@ -108,9 +108,9 @@ export function cartDisplay(cart: CartWire | null): {
       total: formatMoney(cart?.subtotal ?? null),
       canCheckout: Boolean(
         lines.length &&
-          lines.every((line) => line.available) &&
-          !hasStockShortLine &&
-          cart?.status !== "EXPIRED",
+        lines.every((line) => line.available) &&
+        !hasStockShortLine &&
+        cart?.status !== "EXPIRED",
       ),
       ...(hasStockShortLine
         ? {

@@ -37,9 +37,9 @@ function categoryView(node: ApiCategory): Category {
 function sameMoney(left?: ApiMoney | null, right?: ApiMoney | null): boolean {
   return Boolean(
     left &&
-      right &&
-      left.amount === right.amount &&
-      left.currency === right.currency,
+    right &&
+    left.amount === right.amount &&
+    left.currency === right.currency,
   );
 }
 

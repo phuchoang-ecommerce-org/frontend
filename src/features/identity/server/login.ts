@@ -71,9 +71,12 @@ export async function signInWithCredentials(
   }
 }
 
-export async function loginAction(values: {
-  email: string;
-  password: string;
-}, csrfToken: string): Promise<FormResult> {
+export async function loginAction(
+  values: {
+    email: string;
+    password: string;
+  },
+  csrfToken: string,
+): Promise<FormResult> {
   return signInWithCredentials(values.email, values.password, csrfToken);
 }

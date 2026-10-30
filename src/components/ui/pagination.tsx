@@ -26,7 +26,11 @@ export function Pagination({
     <PrimitivePagination aria-label="Pagination">
       <PaginationContent>
         <PaginationItem>
-          <Button variant="secondary" disabled={!hasPrevious} onClick={onPrevious}>
+          <Button
+            variant="secondary"
+            disabled={!hasPrevious}
+            onClick={onPrevious}
+          >
             Previous
           </Button>
         </PaginationItem>

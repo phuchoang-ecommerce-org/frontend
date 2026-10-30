@@ -21,18 +21,37 @@ export function VerifyEmailButton({
     try {
       setResult(await onVerify(token, await csrfToken()));
     } catch {
-      setResult({ ok: false, message: "Verification could not be completed. Try again." });
+      setResult({
+        ok: false,
+        message: "Verification could not be completed. Try again.",
+      });
     } finally {
       setPending(false);
     }
   }
   return (
     <div className="space-y-3">
-      <Button loading={pending} disabled={!token || result?.ok} onClick={() => void verify()}>
+      <Button
+        loading={pending}
+        disabled={!token || result?.ok}
+        onClick={() => void verify()}
+      >
         Verify email
       </Button>
-      {result && <StatusMessage kind={result.ok ? "success" : "error"} message={result.message ?? "Email verified."} />}
-      {result?.ok && <Link href="/login" className="inline-block text-sm underline underline-offset-4">Go to sign-in</Link>}
+      {result && (
+        <StatusMessage
+          kind={result.ok ? "success" : "error"}
+          message={result.message ?? "Email verified."}
+        />
+      )}
+      {result?.ok && (
+        <Link
+          href="/login"
+          className="inline-block text-sm underline underline-offset-4"
+        >
+          Go to sign-in
+        </Link>
+      )}
     </div>
   );
 }

@@ -170,10 +170,13 @@ export function LoginForm({
   onSubmit,
   successHref,
 }: {
-  onSubmit: (values: {
-    email: string;
-    password: string;
-  }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: {
+      email: string;
+      password: string;
+    },
+    csrfToken: string,
+  ) => Promise<FormResult>;
   successHref?: string | undefined;
 }) {
   return (
@@ -206,11 +209,14 @@ export function LoginForm({
 export function RegisterForm({
   onSubmit,
 }: {
-  onSubmit: (values: {
-    name: string;
-    email: string;
-    password: string;
-  }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: {
+      name: string;
+      email: string;
+      password: string;
+    },
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -247,11 +253,14 @@ export function PasswordForm({
   onSubmit,
 }: {
   mode?: "reset" | "change";
-  onSubmit: (values: {
-    email: string;
-    password: string;
-    newPassword: string;
-  }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: {
+      email: string;
+      password: string;
+      newPassword: string;
+    },
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -293,7 +302,10 @@ export function PasswordForm({
 export function ForgotPasswordForm({
   onSubmit,
 }: {
-  onSubmit: (values: { email: string }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: { email: string },
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -319,10 +331,13 @@ export function ResetPasswordForm({
   onSubmit,
 }: {
   token: string;
-  onSubmit: (values: {
-    token: string;
-    newPassword: string;
-  }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: {
+      token: string;
+      newPassword: string;
+    },
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm
@@ -345,7 +360,10 @@ export function ResetPasswordForm({
 export function ResendVerificationForm({
   onSubmit,
 }: {
-  onSubmit: (values: { email: string }, csrfToken: string) => Promise<FormResult>;
+  onSubmit: (
+    values: { email: string },
+    csrfToken: string,
+  ) => Promise<FormResult>;
 }) {
   return (
     <ManagedForm

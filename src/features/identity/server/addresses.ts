@@ -8,11 +8,7 @@ import {
   replaceAddress,
   type CustomerAddressWrite,
 } from "@/lib/api/addresses";
-import {
-  fieldErrors,
-  problemMessage,
-  readProblem,
-} from "@/lib/api/backend";
+import { fieldErrors, problemMessage, readProblem } from "@/lib/api/backend";
 import { getSession } from "@/lib/session";
 import { checkActionCsrf } from "@/lib/session/csrf";
 import type { AddressDraft, FormResult } from "../types";
@@ -35,7 +31,9 @@ const addressSchema = z.object({
   isDefaultBilling: z.boolean(),
 });
 
-function writeAddress(value: z.infer<typeof addressSchema>): CustomerAddressWrite {
+function writeAddress(
+  value: z.infer<typeof addressSchema>,
+): CustomerAddressWrite {
   return {
     recipientName: value.recipientName,
     line1: value.line1,

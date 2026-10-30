@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { adjustInventoryStock, type InventoryAdjustmentWrite } from "@/lib/api/inventory";
+import {
+  adjustInventoryStock,
+  type InventoryAdjustmentWrite,
+} from "@/lib/api/inventory";
 import { fieldErrors, problemMessage, readProblem } from "@/lib/api/backend";
 import { getSession } from "@/lib/session";
 import { canAdjustInventory } from "@/lib/session/roles";
@@ -14,7 +17,10 @@ export type InventoryActionResult =
   | { ok: false; message: string; errors?: Record<string, string> };
 
 const adjustmentSchema = z.object({
-  delta: z.number().int().refine((value) => value !== 0, "Enter a non-zero whole number."),
+  delta: z
+    .number()
+    .int()
+    .refine((value) => value !== 0, "Enter a non-zero whole number."),
   reasonCode: z.string().trim().min(1, "Choose a reason code."),
   reason: z.string().trim().min(1, "Enter an explanation."),
 });
@@ -33,9 +39,13 @@ export async function adjustStockAction(
     return { ok: false, message: "Invalid stock record." };
   }
   const session = await getSession();
-  if (!session) return { ok: false, message: "Your session ended. Sign in and try again." };
+  if (!session)
+    return { ok: false, message: "Your session ended. Sign in and try again." };
   if (!canAdjustInventory(session.account.roles)) {
-    return { ok: false, message: "You do not have permission to adjust stock." };
+    return {
+      ok: false,
+      message: "You do not have permission to adjust stock.",
+    };
   }
   const parsed = adjustmentSchema.safeParse(values);
   if (!parsed.success) {
@@ -43,7 +53,10 @@ export async function adjustStockAction(
       ok: false,
       message: "Check the highlighted fields.",
       errors: Object.fromEntries(
-        parsed.error.issues.map((issue) => [String(issue.path[0]), issue.message]),
+        parsed.error.issues.map((issue) => [
+          String(issue.path[0]),
+          issue.message,
+        ]),
       ),
     };
   }
@@ -61,13 +74,22 @@ export async function adjustStockAction(
         message:
           response.status === 409
             ? "This adjustment would make available stock negative."
-            : problemMessage(problem, "The stock adjustment could not be recorded."),
+            : problemMessage(
+                problem,
+                "The stock adjustment could not be recorded.",
+              ),
         errors: fieldErrors(problem),
       };
     }
     revalidatePath("/staff/inventory");
-    return { ok: true, message: "Stock adjustment recorded. Inventory was refreshed." };
+    return {
+      ok: true,
+      message: "Stock adjustment recorded. Inventory was refreshed.",
+    };
   } catch {
-    return { ok: false, message: "The inventory service is unavailable. Try again shortly." };
+    return {
+      ok: false,
+      message: "The inventory service is unavailable. Try again shortly.",
+    };
   }
 }

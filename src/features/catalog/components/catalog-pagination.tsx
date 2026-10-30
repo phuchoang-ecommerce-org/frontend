@@ -1,19 +1,12 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { focusRing } from "@/components/ui/styles";
-import {
-  cursorPaginationHrefs,
-  type CursorPage,
-} from "../pagination";
+import { cursorPaginationHrefs, type CursorPage } from "../pagination";
 
 const controlClass =
   "inline-flex min-h-control items-center gap-1 rounded-control border border-border px-3 text-sm font-medium";
 
-function DisabledControl({
-  direction,
-}: {
-  direction: "previous" | "next";
-}) {
+function DisabledControl({ direction }: { direction: "previous" | "next" }) {
   return (
     <span
       aria-disabled="true"
