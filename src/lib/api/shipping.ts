@@ -144,3 +144,19 @@ export async function getOrderTracking(
   if (!response.ok) throw response;
   return parseOrderTracking(await response.json());
 }
+
+export type ShipmentWrite = components["schemas"]["ShipmentWrite"];
+
+export async function createShipment(
+  accessToken: string,
+  input: ShipmentWrite,
+): Promise<Shipment> {
+  const response = await backendRequest("/shipments", {
+    method: "POST",
+    headers: bearer(accessToken),
+    body: JSON.stringify(input),
+    cache: "no-store",
+  });
+  if (!response.ok) throw response;
+  return parseShipment(await response.json());
+}

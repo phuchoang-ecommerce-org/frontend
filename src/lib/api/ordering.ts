@@ -278,6 +278,20 @@ export async function getOrder(accessToken: string, orderId: string): Promise<Or
   ) as Promise<Order>;
 }
 
+export function advanceOrderStatus(
+  accessToken: string,
+  orderId: string,
+  status: string,
+  reason?: string,
+): Promise<Response> {
+  return backendRequest(`/orders/${encodeURIComponent(orderId)}/status-transitions`, {
+    method: "POST",
+    headers: bearer(accessToken),
+    body: JSON.stringify({ status, ...(reason ? { reason } : {}) }),
+    cache: "no-store",
+  });
+}
+
 export async function listOrders(
   accessToken: string,
   cursor?: string,

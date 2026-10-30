@@ -14,7 +14,7 @@ export type Shipment = {
 };
 export type ShipmentRequest = {
   orderId: string;
-  carrier: string;
-  trackingNumber: string;
-  manualReason: string;
+  carrier?: string;
+  carrierOverrideReason?: string;
+  lineIds?: string[];
 };

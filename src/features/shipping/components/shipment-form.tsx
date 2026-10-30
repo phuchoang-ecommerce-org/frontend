@@ -18,22 +18,29 @@ export function ShipmentForm({
   errors?: Partial<Record<keyof ShipmentRequest, string>>;
   onSubmit: (request: ShipmentRequest) => void | Promise<void>;
 }) {
-  const [carrier, setCarrier] = useState("");
-  const [trackingNumber, setTrackingNumber] = useState("");
-  const [manualReason, setManualReason] = useState("");
+  const [carrier, setCarrier] = useState("automatic");
+  const [carrierOverrideReason, setCarrierOverrideReason] = useState("");
+  const [lineIds, setLineIds] = useState("");
   const [localError, setLocalError] = useState("");
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (
       !orderId ||
-      !carrier ||
-      (carrier === "manual" && !manualReason.trim())
+      (carrier !== "automatic" && !carrierOverrideReason.trim())
     ) {
-      setLocalError("Select a carrier and explain a manual shipment.");
+      setLocalError("Explain why a carrier override is required.");
       return;
     }
     setLocalError("");
-    void onSubmit({ orderId, carrier, trackingNumber, manualReason });
+    void onSubmit({
+      orderId,
+      ...(carrier !== "automatic"
+        ? { carrier, carrierOverrideReason: carrierOverrideReason.trim() }
+        : {}),
+      ...(lineIds.trim()
+        ? { lineIds: lineIds.split(",").map((id) => id.trim()).filter(Boolean) }
+        : {}),
+    });
   }
   return (
     <form onSubmit={submit} className="space-y-4" aria-busy={pending}>
@@ -45,27 +52,28 @@ export function ShipmentForm({
         label="Carrier"
         value={carrier}
         options={carriers}
-        required
         error={errors.carrier}
         onChange={setCarrier}
       />
-      <TextField
-        name="trackingNumber"
-        label="Tracking number"
-        value={trackingNumber}
-        error={errors.trackingNumber}
-        onChange={setTrackingNumber}
-      />
-      {carrier === "manual" && (
+      {carrier !== "automatic" && (
         <TextField
-          name="manualReason"
-          label="Manual shipment reason"
-          value={manualReason}
+          name="carrierOverrideReason"
+          label="Carrier override reason"
+          value={carrierOverrideReason}
           required
-          error={errors.manualReason}
-          onChange={setManualReason}
+          error={errors.carrierOverrideReason}
+          onChange={setCarrierOverrideReason}
         />
       )}
+      <TextField
+        name="lineIds"
+        label="Order line IDs (optional)"
+        hint="Separate IDs with commas to create one shipment for those lines."
+        value={lineIds}
+        error={errors.lineIds}
+        onChange={setLineIds}
+      />
+      <p className="text-sm text-muted">The carrier issues the tracking reference after this request succeeds.</p>
       {localError && <StatusMessage kind="error" message={localError} />}
       <Button type="submit" loading={pending}>
         Create shipment
