@@ -31,6 +31,12 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ or
     <PageShell title={`Order ${order.orderNumber}`} actions={<Link className="text-sm font-medium underline underline-offset-4" href="/account/orders">All orders</Link>}>
       <div className="grid items-start gap-6">
         <OrderDetail order={order} />
+        <Link
+          href={`/account/orders/${encodeURIComponent(order.id)}/tracking`}
+          className="w-fit text-sm font-medium underline underline-offset-4"
+        >
+          Track shipment
+        </Link>
         <section aria-label="Payment details" className="max-w-xs">
           <Suspense fallback={<LoadingSkeleton shape="card" />}>
             <OrderPaymentStatus accessToken={session.accessToken} orderId={order.id} />

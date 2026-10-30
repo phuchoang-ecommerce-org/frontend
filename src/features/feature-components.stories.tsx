@@ -297,22 +297,30 @@ export const Shipping: Story = {
   render: () => (
     <div className="grid gap-6 md:grid-cols-2">
       <TrackingTimeline
+        orderStatus="SHIPPING"
         shipments={[
           {
             id: "SHP-1",
+            orderId: "EC-1042",
             carrier: "Postal service",
-            trackingNumber: "TRK123",
-            status: "In transit",
-            events: [
+            trackingReference: "TRK123",
+            status: "IN_TRANSIT",
+            createdAt: "2026-10-25T08:55:00Z",
+            lastUpdateReceivedAt: "2026-10-26T08:05:00Z",
+            trackingEvents: [
               {
                 id: "1",
-                label: "Collected",
-                occurredAt: "2026-10-25T09:00:00Z",
+                status: "COLLECTED",
+                carrierOccurredAt: "2026-10-25T09:00:00Z",
+                receivedAt: "2026-10-25T09:05:00Z",
+                applied: true,
               },
               {
                 id: "2",
-                label: "In transit",
-                occurredAt: "2026-10-26T08:00:00Z",
+                status: "IN_TRANSIT",
+                carrierOccurredAt: "2026-10-26T08:00:00Z",
+                receivedAt: "2026-10-26T08:05:00Z",
+                applied: true,
               },
             ],
           },
