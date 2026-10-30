@@ -11,9 +11,16 @@ export type CheckoutAttempt = {
   idempotencyKey: string;
 };
 
+/** A payment key is kept server-side so reloads cannot create another attempt. */
+export type PaymentAttempt = {
+  method: string;
+  idempotencyKey: string;
+};
+
 export type StoredSession = BackendSession & {
   expiresAt: number;
   checkoutAttempts?: Record<string, CheckoutAttempt>;
+  paymentAttempts?: Record<string, PaymentAttempt>;
 };
 
 type SessionStore = {

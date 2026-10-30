@@ -8,6 +8,7 @@ import { formatMoney } from "@/lib/format/money";
 import type { Checkout, OrderSummary } from "@/lib/api/ordering";
 import { csrfToken } from "@/lib/session/client-csrf";
 import { placeOrderAction, type CheckoutActionResult } from "../server/actions";
+import { initiatePaymentAction } from "@/features/payment/server/actions";
 
 function address(value: Checkout["order"]["shippingAddress"]) {
   return value
@@ -215,9 +216,32 @@ export function CheckoutReview({
                     );
                     setResult(next);
                     if (next.ok && next.orderId)
-                      router.push(
-                        `/account/orders/${encodeURIComponent(next.orderId)}`,
-                      );
+                      if (checkout.paymentMethod?.type === "CASH_ON_DELIVERY") {
+                        router.push(
+                          `/account/orders/${encodeURIComponent(next.orderId)}`,
+                        );
+                      } else if (checkout.paymentMethod?.type) {
+                        const payment = await initiatePaymentAction(
+                          next.orderId,
+                          checkout.paymentMethod.type,
+                          await csrfToken(),
+                        );
+                        if (!payment.ok) {
+                          setResult({ ok: false, message: payment.message });
+                          return;
+                        }
+                        if (payment.redirectUrl) {
+                          window.location.assign(payment.redirectUrl);
+                          return;
+                        }
+                        router.push(
+                          `/checkout/payment/processing?orderId=${encodeURIComponent(next.orderId)}`,
+                        );
+                      } else {
+                        router.push(
+                          `/account/orders/${encodeURIComponent(next.orderId)}`,
+                        );
+                      }
                     if (!next.ok && next.recovery)
                       router.push(
                         next.recovery === "cart" ? "/cart" : "/checkout/review",

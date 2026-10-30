@@ -10,6 +10,10 @@ export type PaymentMethodSelection =
   components["schemas"]["PaymentMethodSelection"];
 export type Checkout = components["schemas"]["Checkout"];
 export type Payment = components["schemas"]["Payment"];
+export type PaymentAttempt = components["schemas"]["PaymentAttempt"];
+export type PaymentInitiation = components["schemas"]["PaymentInitiation"];
+export type PaymentInitiationResult =
+  components["schemas"]["PaymentInitiationResult"];
 
 const paymentMethodSchema = z.object({
   type: z.string().min(1),
@@ -33,6 +37,22 @@ const paymentSchema = z.object({
   status: z.string().min(1),
   createdAt: z.string().datetime().optional(),
 });
+const paymentAttemptSchema = z.object({
+  id: z.string().min(1),
+  paymentId: z.string().min(1),
+  attemptNumber: z.number().int().positive(),
+  amount: moneySchema,
+  outcome: z.string().min(1),
+  providerReference: z.string().min(1).optional(),
+  failureReason: z.string().min(1).optional(),
+  requestedAt: z.string().datetime(),
+  resolvedAt: z.string().datetime().optional(),
+});
+const paymentInitiationResultSchema = z.object({
+  payment: paymentSchema,
+  attempt: paymentAttemptSchema,
+  redirectUrl: z.string().url().optional(),
+});
 type ApiPaymentMethod = z.infer<typeof paymentMethodSchema>;
 type PaymentContractCompatibility = PaymentMethod extends ApiPaymentMethod ? true : never;
 const paymentContractCompatibility: PaymentContractCompatibility = true;
@@ -48,6 +68,12 @@ export function parsePaymentMethods(value: unknown): PaymentMethod[] {
 
 export function parsePayment(value: unknown): Payment {
   return paymentSchema.parse(value) as Payment;
+}
+
+export function parsePaymentInitiationResult(
+  value: unknown,
+): PaymentInitiationResult {
+  return paymentInitiationResultSchema.parse(value) as PaymentInitiationResult;
 }
 
 export async function listEligiblePaymentMethods(
@@ -91,4 +117,26 @@ export async function getOrderPayment(
   );
   if (!response.ok) throw response;
   return parsePayment(await response.json());
+}
+
+/** No payment instrument is accepted or sent by this application boundary. */
+export async function initiatePayment(
+  accessToken: string,
+  input: PaymentInitiation,
+  idempotencyKey: string,
+): Promise<{ result: PaymentInitiationResult; status: 201 | 202 }> {
+  const response = await backendRequest("/payments", {
+    method: "POST",
+    headers: { ...bearer(accessToken), "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify(input),
+    cache: "no-store",
+  });
+  if (!response.ok) throw response;
+  if (response.status !== 201 && response.status !== 202) {
+    throw new Error("Payment initiation returned an unsupported success status.");
+  }
+  return {
+    result: parsePaymentInitiationResult(await response.json()),
+    status: response.status,
+  };
 }

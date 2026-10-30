@@ -157,4 +157,31 @@ export async function clearCheckoutAttempt(checkoutId: string): Promise<void> {
   await store.set(id, { ...session, checkoutAttempts });
 }
 
+/**
+ * Each order/method pair owns one payment key for the lifetime of the session.
+ * The browser never receives it, so a reload or a connection failure can only
+ * replay the original request.
+ */
+export async function paymentAttempt(
+  orderId: string,
+  method: string,
+): Promise<string | null> {
+  const id = (await cookies()).get(COOKIE_NAME)?.value;
+  if (!id) return null;
+  const store = sessionStore();
+  const session = await store.get(id);
+  if (!session) return null;
+  const current = session.paymentAttempts?.[orderId];
+  if (current?.method === method) return current.idempotencyKey;
+  const idempotencyKey = randomBytes(32).toString("base64url");
+  await store.set(id, {
+    ...session,
+    paymentAttempts: {
+      ...session.paymentAttempts,
+      [orderId]: { method, idempotencyKey },
+    },
+  });
+  return idempotencyKey;
+}
+
 export type { StoredSession } from "./store";
