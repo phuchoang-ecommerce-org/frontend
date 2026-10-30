@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button, Card, StatusMessage, TextField } from "@/components/ui";
 import { csrfToken } from "@/lib/session/client-csrf";
 import { formatMoney } from "@/lib/format/money";
@@ -56,6 +57,7 @@ export function CheckoutFlow({
   addresses: CustomerAddress[];
   paymentMethods: PaymentMethod[];
 }) {
+  const router = useRouter();
   const [notice, setNotice] = useState<CheckoutActionResult | null>(null);
   const [shippingDraft, setShippingDraft] =
     useState<DraftAddress>(emptyAddress);
@@ -82,7 +84,10 @@ export function CheckoutFlow({
     startTransition(() => {
       void csrfToken()
         .then(action)
-        .then(setNotice)
+        .then((next) => {
+          setNotice(next);
+          if (next.ok) router.refresh();
+        })
         .catch(() =>
           setNotice({
             ok: false,

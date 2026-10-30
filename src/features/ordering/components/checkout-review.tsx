@@ -7,8 +7,8 @@ import { Button, Card, StatusMessage } from "@/components/ui";
 import { formatMoney } from "@/lib/format/money";
 import type { Checkout, OrderSummary } from "@/lib/api/ordering";
 import { csrfToken } from "@/lib/session/client-csrf";
+import { initiatePaymentAction } from "@/lib/actions/initiate-payment";
 import { placeOrderAction, type CheckoutActionResult } from "../server/actions";
-import { initiatePaymentAction } from "@/features/payment/server/actions";
 
 function address(value: Checkout["order"]["shippingAddress"]) {
   return value
